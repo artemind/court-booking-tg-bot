@@ -1,0 +1,21 @@
+services:
+  node:
+    working_dir: /usr/src/app
+    image: node:latest
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "3002:3000"
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - ./docker/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

@@ -1,0 +1,20 @@
+{
+  "name": "court-booking-tg-bot",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/artyom-e/court-booking-tg-bot#readme",
+  "bugs": {
+    "url": "https://github.com/artyom-e/court-booking-tg-bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artyom-e/court-booking-tg-bot.git"
+  },
+  "license": "MIT",
+  "author": "Artem Yeremenko",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
