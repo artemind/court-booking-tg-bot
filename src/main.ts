@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/uk';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { PrismaClient } from './generated/prisma';
 
 config();
 
@@ -15,14 +16,25 @@ function configureDayjs(): void {
   dayjs.tz.setDefault(process.env.APP_TIMEZONE || 'UTC');
 }
 
-function bootstrap(): void {
+
+async function bootstrap(): Promise<void> {
   configureDayjs();
 
+  const prisma = new PrismaClient();
+
   const modules: Module[] = [
-    new BotModule()
+    new BotModule(prisma),
   ];
 
-  modules.forEach(module => module.launch());
+  try {
+    await Promise.all(modules.map(module => module.launch()));
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+  await prisma.$disconnect();
+  console.log('Database disconnected.');
 }
 
 bootstrap();
