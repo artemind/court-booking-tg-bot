@@ -1,0 +1,30 @@
+import { UserService } from '../services/user.service';
+import { Context } from '../context';
+
+export class AppendUserMiddleware {
+  constructor(private userService: UserService) {
+  }
+
+  apply = async (ctx: Context, next: any) => {
+    const name = `${ctx.from?.first_name ?? ''} ${ctx.from?.last_name ?? ''}`.trim();
+    const telegramUsername = ctx.from?.username;
+    const telegramId = ctx.from?.id;
+    if (!telegramId || !telegramUsername) {
+      return;
+    }
+
+    let user = await this.userService.findByTelegramId(telegramId);
+    if (!user) {
+      user = await this.userService.create({
+        name,
+        telegramId,
+        telegramUsername
+      });
+    } else {
+      user = await this.userService.update(user.id, name, telegramUsername);
+    }
+    ctx.user = user;
+
+    return next();
+  }
+}
