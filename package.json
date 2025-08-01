@@ -17,12 +17,17 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "lint": "eslint ./src --ext .ts",
+    "lint:fix": "eslint ./src --ext .ts --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.32.0",
     "@types/node": "^24.1.0",
+    "eslint": "^9.32.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "5.8",
+    "typescript-eslint": "^8.38.0"
   }
 }
