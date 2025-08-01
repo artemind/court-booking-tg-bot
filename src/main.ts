@@ -1,5 +1,8 @@
 import type { Module } from './modules/module.interface';
 import { BotModule } from './modules/bot/bot.module';
+import { config } from 'dotenv';
+
+config();
 
 function bootstrap(): void {
   const modules: Module[] = [

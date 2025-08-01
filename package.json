@@ -29,5 +29,8 @@
     "ts-node": "^10.9.2",
     "typescript": "5.8",
     "typescript-eslint": "^8.38.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
   }
 }
