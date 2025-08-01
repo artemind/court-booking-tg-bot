@@ -1,0 +1,7 @@
+model Court {
+  id      Int       @id @default(autoincrement())
+  name    String
+  Booking Booking[]
+
+  @@map("courts")
+}
