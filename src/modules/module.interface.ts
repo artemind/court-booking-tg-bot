@@ -1,3 +1,3 @@
 export interface Module {
-  launch(): any;
+  launch(): Promise<void>;
 }
