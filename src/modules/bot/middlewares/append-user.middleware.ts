@@ -20,7 +20,7 @@ export class AppendUserMiddleware {
         telegramId,
         telegramUsername
       });
-    } else {
+    } else if (user.telegramUsername !== telegramUsername || user.name !== name) {
       user = await this.userService.update(user.id, name, telegramUsername);
     }
     ctx.user = user;
