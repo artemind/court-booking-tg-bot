@@ -5,7 +5,7 @@ export class AppendUserMiddleware {
   constructor(private userService: UserService) {
   }
 
-  apply = async (ctx: Context, next: any) => {
+  apply = async (ctx: Context, next: () => Promise<void>): Promise<void> => {
     const name = `${ctx.from?.first_name ?? ''} ${ctx.from?.last_name ?? ''}`.trim();
     const telegramUsername = ctx.from?.username;
     const telegramId = ctx.from?.id;
@@ -26,5 +26,5 @@ export class AppendUserMiddleware {
     ctx.user = user;
 
     return next();
-  }
+  };
 }

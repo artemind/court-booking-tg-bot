@@ -10,6 +10,6 @@ export default tseslint.config(
       }
     },
     {
-        "ignorePatterns": ["src/generated/*"]
+        "ignores": ["src/generated/*"]
     },
 );

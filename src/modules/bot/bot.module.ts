@@ -36,7 +36,7 @@ export class BotModule implements Module {
       } else {
         ctx.reply('Ooops, something went wrong.');
       }
-    })
+    });
   }
 
   registerMiddlewares(): void {
