@@ -7,25 +7,25 @@ import { formatDate } from '../../../../utils/date.utils';
 
 export class ChooseDateReply {
   private static getMessageText(ctx: Context): string {
-    const bookingSummary = ctx.session.bookingData ? BookingSummaryFormatter.format(ctx.session.bookingData) + '\n\n' : '';
+    const bookingSummary = BookingSummaryFormatter.format(ctx.session.bookingData!) + '\n\n';
 
     return bookingSummary + '*Choose date*';
   }
 
-  private static getMenuButtons(availableDates: Date[]): (InlineKeyboardButton & { hide?: boolean; })[] {
+  private static getKeyboard(availableDates: Date[]) {
     const buttons: (InlineKeyboardButton & { hide?: boolean; })[] = [];
     availableDates.forEach((date) => {
       buttons.push(Markup.button.callback(formatDate(date), `BOOKING_CHOOSE_DATE_${date.getTime()}`));
     });
 
-    return buttons;
+    return Markup.inlineKeyboard(arrayChunk(buttons, 2));
   }
 
   static async editMessageText(ctx: Context, availableDates: Date[]) {
 
     ctx.answerCbQuery();
     ctx.editMessageText(this.getMessageText(ctx), {
-      ...Markup.inlineKeyboard(arrayChunk(this.getMenuButtons(availableDates), 2)),
+      ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });
   }
@@ -33,7 +33,7 @@ export class ChooseDateReply {
   static async reply(ctx: Context, availableDates: Date[]) {
     ctx.answerCbQuery();
     ctx.reply(this.getMessageText(ctx), {
-      ...Markup.inlineKeyboard(arrayChunk(this.getMenuButtons(availableDates), 2)),
+      ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });
   }

@@ -7,7 +7,7 @@ import { formatMinutes } from '../../../../utils/time.utils';
 
 export class ChooseDurationReply {
   private static getMessageText(ctx: Context): string {
-    const bookingSummary = ctx.session.bookingData ? BookingSummaryFormatter.format(ctx.session.bookingData) + '\n\n' : '';
+    const bookingSummary = BookingSummaryFormatter.format(ctx.session.bookingData!) + '\n\n';
 
     return bookingSummary + '*Choose duration*';
   }
