@@ -5,6 +5,8 @@ import { CourtService } from '../../services/court.service';
 import { StartBookingHandler } from './start-booking.handler';
 import dayjs from 'dayjs';
 import { InvalidDateSelectedException } from '../../exceptions/invalid-date-selected.exception';
+import { ChooseTimeReply } from '../../replies/booking/choose-time.reply';
+import { Booking } from '../../../../generated/prisma';
 
 export class ChooseDateHandler {
   constructor(
@@ -21,14 +23,15 @@ export class ChooseDateHandler {
 
         return;
       }
-      const selectedDate = dayjs(parseInt(ctx.match[1] || '')).startOf('day').tz();
-      console.log(selectedDate.unix(), parseInt(ctx.match[1] || ''));
+      const selectedDate = dayjs(parseInt(ctx.match[1] || '')).startOf('day');
       const availableDates = this.bookingSlotService.generateDateSlots().map(date => date.format('DD-MM-YYYY'));
       if (!availableDates.includes(selectedDate.format('DD-MM-YYYY'))) {
         throw new InvalidDateSelectedException;
       }
       ctx.session.bookingData.date = selectedDate;
-      //todo show next step
+      const bookings: Booking[] = [];
+      const timeSlots = await this.bookingSlotService.generateAvailableTimeSlots(selectedDate, bookings);
+      ChooseTimeReply.editMessageText(ctx, timeSlots);
     });
   }
 }

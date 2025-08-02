@@ -13,7 +13,7 @@ export class BookingSlotService {
 
   generateDateSlots(days: number = 7): dayjs.Dayjs[] {
     const slots: dayjs.Dayjs[] = [];
-    let currentDate = dayjs().startOf('day').tz();
+    let currentDate = dayjs().startOf('day');
     const endDate = currentDate.clone().add(days, 'day');
     while (currentDate <= endDate) {
       slots.push(currentDate);
@@ -39,7 +39,7 @@ export class BookingSlotService {
 
   generateAvailableTimeSlots(date: dayjs.Dayjs, bookings: Booking[]): string[] {
     let startTime = this.bookingAvailableFromTime;
-    if (date.startOf('day').isSame(dayjs().startOf('day'))) {
+    if (date.startOf('day').utc().isSame(dayjs().startOf('day').utc())) {
       const now = dayjs().tz();
       startTime = now.startOf('hour').add(Math.floor(now.minute() / 30) * 30, 'minute').format('HH:mm');
     }
