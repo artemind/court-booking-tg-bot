@@ -7,7 +7,7 @@ import { AppendUserMiddleware } from './middlewares/append-user.middleware';
 import { UserService } from './services/user.service';
 import { ReplyableException } from './exceptions/replyable.exception';
 import { RestrictAccessMiddleware } from './middlewares/restrict-access.middleware';
-import { ChooseCourtHandler } from './handlers/booking/choose-court.handler';
+import { StartBookingHandler } from './handlers/booking/start-booking.handler';
 import { CourtService } from './services/court.service';
 
 export class BotModule implements Module {
@@ -51,6 +51,6 @@ export class BotModule implements Module {
 
   registerHandlers(): void {
     new StartHandler(this.bot).register();
-    new ChooseCourtHandler(this.bot, this.courtService).register();
+    new StartBookingHandler(this.bot, this.courtService).register();
   }
 }

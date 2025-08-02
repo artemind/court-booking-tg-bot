@@ -4,7 +4,7 @@ import { CourtService } from '../../services/court.service';
 import { BOOK } from '../../keyboards/main-menu.items';
 import { ChooseCourtReply } from '../../replies/booking/choose-court.reply';
 
-export class ChooseCourtHandler {
+export class StartBookingHandler {
   constructor(
     private bot: Telegraf<Context>,
     private courtService: CourtService
