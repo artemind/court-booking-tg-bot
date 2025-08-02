@@ -7,6 +7,8 @@ import { AppendUserMiddleware } from './middlewares/append-user.middleware';
 import { UserService } from './services/user.service';
 import { ReplyableException } from './exceptions/replyable.exception';
 import { RestrictAccessMiddleware } from './middlewares/restrict-access.middleware';
+import { ChooseCourtHandler } from './handlers/booking/choose-court.handler';
+import { CourtService } from './services/court.service';
 
 export class BotModule implements Module {
 
@@ -14,11 +16,14 @@ export class BotModule implements Module {
 
   private userService: UserService;
 
+  private courtService: CourtService;
+
   constructor(private prisma: PrismaClient) {
     const token = process.env.BOT_TOKEN;
     if (!token) throw new Error('BOT_TOKEN is not defined');
     this.bot = new Telegraf(token);
     this.userService = new UserService(this.prisma);
+    this.courtService = new CourtService(this.prisma);
   }
 
   async launch(): Promise<void> {
@@ -46,5 +51,6 @@ export class BotModule implements Module {
 
   registerHandlers(): void {
     new StartHandler(this.bot).register();
+    new ChooseCourtHandler(this.bot, this.courtService).register();
   }
 }
