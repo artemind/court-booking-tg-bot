@@ -12,8 +12,12 @@ export class StartBookingHandler {
 
   async register(): Promise<void> {
     this.bot.hears(BOOK, async (ctx: Context): Promise<void> => {
-      const courts = await this.courtService.all();
-      ChooseCourtReply.reply(ctx, courts);
+      this.show(ctx);
     });
+  }
+
+  async show(ctx: Context): Promise<void> {
+    const courts = await this.courtService.all();
+    ChooseCourtReply.reply(ctx, courts);
   }
 }

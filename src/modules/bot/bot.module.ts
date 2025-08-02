@@ -12,6 +12,7 @@ import { CourtService } from './services/court.service';
 import { ChooseCourtHandler } from './handlers/booking/choose-court.handler';
 import { StartSessionMiddleware } from './middlewares/start-session.middleware';
 import { BookingSlotService } from './services/booking-slot.service';
+import { ChooseDateHandler } from './handlers/booking/choose-date.handler';
 
 export class BotModule implements Module {
 
@@ -67,5 +68,6 @@ export class BotModule implements Module {
     new StartHandler(this.bot).register();
     new StartBookingHandler(this.bot, this.courtService).register();
     new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
+    new ChooseDateHandler(this.bot, this.courtService, this.bookingSlotService).register();
   }
 }
