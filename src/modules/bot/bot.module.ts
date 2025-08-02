@@ -1,6 +1,6 @@
 import type { Module } from '../module.interface';
 import { PrismaClient } from '../../generated/prisma';
-import { Telegraf } from 'telegraf';
+import { session, Telegraf } from 'telegraf';
 import { StartHandler } from './handlers/start.handler';
 import { Context } from './context';
 import { AppendUserMiddleware } from './middlewares/append-user.middleware';
@@ -9,6 +9,8 @@ import { ReplyableException } from './exceptions/replyable.exception';
 import { RestrictAccessMiddleware } from './middlewares/restrict-access.middleware';
 import { StartBookingHandler } from './handlers/booking/start-booking.handler';
 import { CourtService } from './services/court.service';
+import { ChooseCourtHandler } from './handlers/booking/choose-court.handler';
+import { StartSessionMiddleware } from './middlewares/start-session.middleware';
 
 export class BotModule implements Module {
 
@@ -45,6 +47,8 @@ export class BotModule implements Module {
   }
 
   registerMiddlewares(): void {
+    this.bot.use(session());
+    this.bot.use(new StartSessionMiddleware().apply);
     this.bot.use(new AppendUserMiddleware(this.userService).apply);
     this.bot.use(new RestrictAccessMiddleware().apply);
   }
@@ -52,5 +56,6 @@ export class BotModule implements Module {
   registerHandlers(): void {
     new StartHandler(this.bot).register();
     new StartBookingHandler(this.bot, this.courtService).register();
+    new ChooseCourtHandler(this.bot, this.courtService).register();
   }
 }
