@@ -7,11 +7,13 @@ import dayjs from 'dayjs';
 import { InvalidDateSelectedException } from '../../exceptions/invalid-date-selected.exception';
 import { ChooseTimeReply } from '../../replies/booking/choose-time.reply';
 import { Booking } from '../../../../generated/prisma';
+import { BookingService } from '../../services/booking.service';
 
 export class ChooseDateHandler {
   constructor(
     private bot: Telegraf<Context>,
     private courtService: CourtService,
+    private bookingService: BookingService,
     private bookingSlotService: BookingSlotService,
   ) {}
 
@@ -29,7 +31,7 @@ export class ChooseDateHandler {
         throw new InvalidDateSelectedException;
       }
       ctx.session.bookingData.date = selectedDate;
-      const bookings: Booking[] = [];
+      const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, selectedDate);
       const timeSlots = await this.bookingSlotService.generateAvailableTimeSlots(selectedDate, bookings);
       ChooseTimeReply.editMessageText(ctx, timeSlots);
     });

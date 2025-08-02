@@ -5,15 +5,33 @@ import { BookingSummaryFormatter } from '../../formatters/booking-summary.format
 import { Context } from '../../context';
 
 export class ChooseTimeReply {
-  static async editMessageText(ctx: Context, availableTime: string[]) {
+  private static getMessageText(ctx: Context): string {
+    const bookingSummary = ctx.session.bookingData ? BookingSummaryFormatter.format(ctx.session.bookingData) + '\n\n' : '';
+
+    return bookingSummary + '*Choose time*';
+  }
+
+  private static getMenuButtons(availableTime: string[]): (InlineKeyboardButton & { hide?: boolean; })[] {
     const buttons: (InlineKeyboardButton & { hide?: boolean; })[] = [];
     availableTime.forEach((time) => {
       buttons.push(Markup.button.callback(time, `BOOKING_CHOOSE_TIME_${time}`));
     });
+
+    return buttons;
+  }
+
+  static async editMessageText(ctx: Context, availableTime: string[]) {
     ctx.answerCbQuery();
-    const bookingSummary = ctx.session.bookingData ? BookingSummaryFormatter.format(ctx.session.bookingData) + '\n\n' : '';
-    ctx.editMessageText(bookingSummary + '*Choose time*', {
-      ...Markup.inlineKeyboard(arrayChunk(buttons, 4)),
+    ctx.editMessageText(this.getMessageText(ctx), {
+      ...Markup.inlineKeyboard(arrayChunk(this.getMenuButtons(availableTime), 4)),
+      parse_mode: 'Markdown'
+    });
+  }
+
+  static async reply(ctx: Context, availableTime: string[]) {
+    ctx.answerCbQuery();
+    ctx.reply(this.getMessageText(ctx), {
+      ...Markup.inlineKeyboard(arrayChunk(this.getMenuButtons(availableTime), 4)),
       parse_mode: 'Markdown'
     });
   }
