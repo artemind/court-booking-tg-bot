@@ -6,6 +6,7 @@ import { StartBookingHandler } from './start-booking.handler';
 import { ChooseTimeReply } from '../../replies/booking/choose-time.reply';
 import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
+import { ChooseDurationReply } from '../../replies/booking/choose-duration.reply';
 
 export class ChooseTimeHandler {
   constructor(
@@ -32,7 +33,7 @@ export class ChooseTimeHandler {
         return;
       }
       ctx.session.bookingData.time = selectedTime;
-      //todo show choose duration step
+      ChooseDurationReply.editMessageText(ctx, this.bookingSlotService.generateDurations());
     });
   }
 }
