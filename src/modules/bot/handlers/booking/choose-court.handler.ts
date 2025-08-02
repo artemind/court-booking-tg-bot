@@ -13,7 +13,7 @@ export class ChooseCourtHandler {
   async register(): Promise<void> {
     this.bot.hears(BOOK, async (ctx: Context): Promise<void> => {
       const courts = await this.courtService.all();
-      ChooseCourtReply.reply(ctx, courts)
+      ChooseCourtReply.reply(ctx, courts);
     });
   }
 }

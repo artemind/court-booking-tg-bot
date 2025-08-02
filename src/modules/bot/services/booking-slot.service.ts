@@ -46,7 +46,7 @@ export class BookingSlotService {
     const allSlots: string[] = this.generateTimeSlots(startTime, this.bookingAvailableToTime);
     let bookedSlots: string[] = [];
     bookings.forEach(booking => {
-      bookedSlots = [...bookedSlots, ...this.generateTimeSlots(dayjs(booking.dateFrom).tz().format('HH:mm'), dayjs(booking.dateTill).tz().subtract(1, 'second').format('HH:mm'))]
+      bookedSlots = [...bookedSlots, ...this.generateTimeSlots(dayjs(booking.dateFrom).tz().format('HH:mm'), dayjs(booking.dateTill).tz().subtract(1, 'second').format('HH:mm'))];
     });
 
     return allSlots.filter(slot => !bookedSlots.includes(slot));
