@@ -2,11 +2,14 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
 import { CourtService } from '../../services/court.service';
 import { CourtNotFoundException } from '../../exceptions/court-not-found.exception';
+import { ChooseDateReply } from '../../replies/booking/choose-date.reply';
+import { BookingSlotService } from '../../services/booking-slot.service';
 
 export class ChooseCourtHandler {
   constructor(
     private bot: Telegraf<Context>,
-    private courtService: CourtService
+    private courtService: CourtService,
+    private bookingSlotService: BookingSlotService,
   ) {}
 
   async register(): Promise<void> {
@@ -19,7 +22,7 @@ export class ChooseCourtHandler {
         courtId: selectedCourt.id,
         courtName: selectedCourt.name,
       };
-      //todo show next step
+      ChooseDateReply.editMessageText(ctx, this.bookingSlotService.generateDateSlots().map(date => date.toDate()));
     });
   }
 }

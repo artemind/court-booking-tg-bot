@@ -11,7 +11,7 @@ export class BookingSlotService {
   ) {
   }
 
-  generateDateSlots(days: number): dayjs.Dayjs[] {
+  generateDateSlots(days: number = 7): dayjs.Dayjs[] {
     const slots: dayjs.Dayjs[] = [];
     let currentDate = dayjs().tz().startOf('day');
     const endDate = currentDate.clone().add(days, 'day');

@@ -11,6 +11,7 @@ import { StartBookingHandler } from './handlers/booking/start-booking.handler';
 import { CourtService } from './services/court.service';
 import { ChooseCourtHandler } from './handlers/booking/choose-court.handler';
 import { StartSessionMiddleware } from './middlewares/start-session.middleware';
+import { BookingSlotService } from './services/booking-slot.service';
 
 export class BotModule implements Module {
 
@@ -20,12 +21,21 @@ export class BotModule implements Module {
 
   private courtService: CourtService;
 
+  private bookingSlotService: BookingSlotService;
+
   constructor(private prisma: PrismaClient) {
     const token = process.env.BOT_TOKEN;
     if (!token) throw new Error('BOT_TOKEN is not defined');
     this.bot = new Telegraf(token);
     this.userService = new UserService(this.prisma);
     this.courtService = new CourtService(this.prisma);
+    this.bookingSlotService = new BookingSlotService(
+      process.env.BOOKING_AVAILABLE_FROM_TIME || '07:00',
+      process.env.BOOKING_AVAILABLE_TO_TIME || '23:59',
+      parseInt(process.env.BOOKING_SLOT_SIZE_IN_MINUTES || '30'),
+      parseInt(process.env.BOOKING_MIN_DURATION_MINUTES || '30'),
+      parseInt(process.env.BOOKING_MAX_DURATION_MINUTES || '180'),
+    );
   }
 
   async launch(): Promise<void> {
@@ -56,6 +66,6 @@ export class BotModule implements Module {
   registerHandlers(): void {
     new StartHandler(this.bot).register();
     new StartBookingHandler(this.bot, this.courtService).register();
-    new ChooseCourtHandler(this.bot, this.courtService).register();
+    new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
   }
 }
