@@ -15,6 +15,7 @@ import { BookingSlotService } from './services/booking-slot.service';
 import { ChooseDateHandler } from './handlers/booking/choose-date.handler';
 import { ChooseTimeHandler } from './handlers/booking/choose-time.handler';
 import { BookingService } from './services/booking.service';
+import { ChooseDurationHandler } from './handlers/booking/choose-duration.handler';
 
 export class BotModule implements Module {
 
@@ -75,5 +76,6 @@ export class BotModule implements Module {
     new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
     new ChooseDateHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
     new ChooseTimeHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
+    new ChooseDurationHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
   }
 }

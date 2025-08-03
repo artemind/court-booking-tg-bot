@@ -33,6 +33,7 @@ export class ChooseTimeHandler {
         return;
       }
       ctx.session.bookingData.time = selectedTime;
+      //todo pass only available durations based on time slots
       ChooseDurationReply.editMessageText(ctx, this.bookingSlotService.generateDurations());
     });
   }
