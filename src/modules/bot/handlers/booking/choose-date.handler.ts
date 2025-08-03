@@ -25,7 +25,7 @@ export class ChooseDateHandler {
 
         return;
       }
-      const selectedDate = dayjs(parseInt(ctx.match[1] || '')).startOf('day');
+      const selectedDate = dayjs.utc(parseInt(ctx.match[1] || '')).startOf('day');
       const availableDates = this.bookingSlotService.generateDateSlots().map(date => date.format('DD-MM-YYYY'));
       if (!availableDates.includes(selectedDate.format('DD-MM-YYYY'))) {
         throw new InvalidDateSelectedException;

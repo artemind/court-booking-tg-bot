@@ -34,9 +34,8 @@ export class ChooseTimeHandler {
         return;
       }
       ctx.session.bookingData.time = selectedTime;
-      const dateAndTime = dayjs.tz(ctx.session.bookingData.date.format('YYYY-MM-DD') + 'T' + ctx.session.bookingData.time, process.env.APP_TIMEZONE!);
-      //todo pass only available durations based on time slots
-      ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(dateAndTime, bookings));
+      ctx.session.bookingData.dateAndTime = dayjs.tz(ctx.session.bookingData.date.format('YYYY-MM-DD') + 'T' + ctx.session.bookingData.time).startOf('minute').utc();
+      ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings));
     });
   }
 }

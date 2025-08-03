@@ -12,7 +12,7 @@ export class BookingService {
   }
 
   async getByDate(courtId: number, date: dayjs.Dayjs): Promise<Booking[]> {
-    const startDate = date.startOf('day');
+    const startDate = date.startOf('day').utc();
     const endDate = date.endOf('day');
 
     return this.prisma.booking.findMany({

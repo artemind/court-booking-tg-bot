@@ -73,7 +73,7 @@ export class BookingSlotService {
   generateAvailableDurations(startTime: dayjs.Dayjs, bookings: Booking[]): number[] {
     startTime = startTime.utc();
     const allDurations = this.generateDurations();
-    const bookingEndOfDay = dayjs(`${startTime.format('YYYY-MM-DD')}T${this.bookingAvailableToTime}`);
+    const bookingEndOfDay = dayjs.tz(`${startTime.tz().format('YYYY-MM-DD')}T${this.bookingAvailableToTime}`).utc();
     return allDurations.filter(duration => {
       const endTime = startTime.add(duration, 'minute');
       if (endTime.subtract(1, 'minute').isAfter(bookingEndOfDay)) {

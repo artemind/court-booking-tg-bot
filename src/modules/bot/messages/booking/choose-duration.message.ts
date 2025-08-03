@@ -15,7 +15,7 @@ export class ChooseDurationMessage {
   private static getKeyboard(availableDurations: number[]) {
     const buttons: (InlineKeyboardButton & { hide?: boolean; })[] = [];
     availableDurations.forEach((duration) => {
-      buttons.push(Markup.button.callback(formatMinutes(duration), `BOOKING_CHOOSE_duration_${duration}`));
+      buttons.push(Markup.button.callback(formatMinutes(duration), `BOOKING_CHOOSE_DURATION_${duration}`));
     });
 
     return Markup.inlineKeyboard(arrayChunk(buttons, 3));
