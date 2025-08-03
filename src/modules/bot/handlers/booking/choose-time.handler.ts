@@ -7,6 +7,7 @@ import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
 import { ChooseDurationMessage } from '../../messages/booking/choose-duration.message';
+import dayjs from 'dayjs';
 
 export class ChooseTimeHandler {
   constructor(
@@ -33,8 +34,9 @@ export class ChooseTimeHandler {
         return;
       }
       ctx.session.bookingData.time = selectedTime;
+      const dateAndTime = dayjs.tz(ctx.session.bookingData.date.format('YYYY-MM-DD') + 'T' + ctx.session.bookingData.time, process.env.APP_TIMEZONE!);
       //todo pass only available durations based on time slots
-      ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateDurations());
+      ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(dateAndTime, bookings));
     });
   }
 }
