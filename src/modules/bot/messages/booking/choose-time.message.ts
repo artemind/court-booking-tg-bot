@@ -3,37 +3,35 @@ import { InlineKeyboardButton } from 'telegraf/types';
 import { arrayChunk } from '../../../../utils/array.utils';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import { Context } from '../../context';
-import { formatDate } from '../../../../utils/date.utils';
 
-export class ChooseDateReply {
+export class ChooseTimeMessage {
   private static getMessageText(ctx: Context): string {
     const bookingSummary = BookingSummaryFormatter.format(ctx.session.bookingData!) + '\n\n';
 
-    return bookingSummary + '*Choose date*';
+    return bookingSummary + '*Choose time*';
   }
 
-  private static getKeyboard(availableDates: Date[]) {
+  private static getKeyboard(availableTime: string[]) {
     const buttons: (InlineKeyboardButton & { hide?: boolean; })[] = [];
-    availableDates.forEach((date) => {
-      buttons.push(Markup.button.callback(formatDate(date), `BOOKING_CHOOSE_DATE_${date.getTime()}`));
+    availableTime.forEach((time) => {
+      buttons.push(Markup.button.callback(time, `BOOKING_CHOOSE_TIME_${time}`));
     });
 
-    return Markup.inlineKeyboard(arrayChunk(buttons, 2));
+    return Markup.inlineKeyboard(arrayChunk(buttons, 4));
   }
 
-  static async editMessageText(ctx: Context, availableDates: Date[]) {
-
+  static async editMessageText(ctx: Context, availableTime: string[]) {
     ctx.answerCbQuery();
     ctx.editMessageText(this.getMessageText(ctx), {
-      ...this.getKeyboard(availableDates),
+      ...this.getKeyboard(availableTime),
       parse_mode: 'Markdown'
     });
   }
 
-  static async reply(ctx: Context, availableDates: Date[]) {
+  static async reply(ctx: Context, availableTime: string[]) {
     ctx.answerCbQuery();
     ctx.reply(this.getMessageText(ctx), {
-      ...this.getKeyboard(availableDates),
+      ...this.getKeyboard(availableTime),
       parse_mode: 'Markdown'
     });
   }

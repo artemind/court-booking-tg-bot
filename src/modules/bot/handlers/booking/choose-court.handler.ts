@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
 import { CourtService } from '../../services/court.service';
 import { CourtNotFoundException } from '../../exceptions/court-not-found.exception';
-import { ChooseDateReply } from '../../replies/booking/choose-date.reply';
+import { ChooseDateMessage } from '../../messages/booking/choose-date.message';
 import { BookingSlotService } from '../../services/booking-slot.service';
 
 export class ChooseCourtHandler {
@@ -22,7 +22,7 @@ export class ChooseCourtHandler {
         courtId: selectedCourt.id,
         courtName: selectedCourt.name,
       };
-      ChooseDateReply.editMessageText(ctx, this.bookingSlotService.generateDateSlots().map(date => date.toDate()));
+      ChooseDateMessage.editMessageText(ctx, this.bookingSlotService.generateDateSlots().map(date => date.toDate()));
     });
   }
 }

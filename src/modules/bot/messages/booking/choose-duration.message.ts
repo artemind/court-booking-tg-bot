@@ -5,7 +5,7 @@ import { BookingSummaryFormatter } from '../../formatters/booking-summary.format
 import { Context } from '../../context';
 import { formatMinutes } from '../../../../utils/time.utils';
 
-export class ChooseDurationReply {
+export class ChooseDurationMessage {
   private static getMessageText(ctx: Context): string {
     const bookingSummary = BookingSummaryFormatter.format(ctx.session.bookingData!) + '\n\n';
 

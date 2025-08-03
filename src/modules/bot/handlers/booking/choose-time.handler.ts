@@ -3,10 +3,10 @@ import { Context } from '../../context';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { CourtService } from '../../services/court.service';
 import { StartBookingHandler } from './start-booking.handler';
-import { ChooseTimeReply } from '../../replies/booking/choose-time.reply';
+import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
-import { ChooseDurationReply } from '../../replies/booking/choose-duration.reply';
+import { ChooseDurationMessage } from '../../messages/booking/choose-duration.message';
 
 export class ChooseTimeHandler {
   constructor(
@@ -29,12 +29,12 @@ export class ChooseTimeHandler {
       const availableTimeSlots = this.bookingSlotService.generateAvailableTimeSlots(ctx.session.bookingData.date, bookings);
       if (!availableTimeSlots.includes(selectedTime)) {
         ctx.reply('Selected time already booked. Please choose another time.');
-        ChooseTimeReply.reply(ctx, availableTimeSlots);
+        ChooseTimeMessage.reply(ctx, availableTimeSlots);
         return;
       }
       ctx.session.bookingData.time = selectedTime;
       //todo pass only available durations based on time slots
-      ChooseDurationReply.editMessageText(ctx, this.bookingSlotService.generateDurations());
+      ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateDurations());
     });
   }
 }

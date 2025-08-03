@@ -5,7 +5,7 @@ import { CourtService } from '../../services/court.service';
 import { StartBookingHandler } from './start-booking.handler';
 import dayjs from 'dayjs';
 import { InvalidDateSelectedException } from '../../exceptions/invalid-date-selected.exception';
-import { ChooseTimeReply } from '../../replies/booking/choose-time.reply';
+import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
 
@@ -33,7 +33,7 @@ export class ChooseDateHandler {
       ctx.session.bookingData.date = selectedDate;
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, selectedDate);
       const timeSlots = await this.bookingSlotService.generateAvailableTimeSlots(selectedDate, bookings);
-      ChooseTimeReply.editMessageText(ctx, timeSlots);
+      ChooseTimeMessage.editMessageText(ctx, timeSlots);
     });
   }
 }

@@ -2,7 +2,7 @@ import { Context, Markup } from 'telegraf';
 import type { Court } from '../../../../generated/prisma';
 import { InlineKeyboardButton } from 'telegraf/types';
 
-export class ChooseCourtReply {
+export class ChooseCourtMessage {
   static async reply(ctx: Context, courts: Court[]) {
     let courtsString = '';
     const buttons: (InlineKeyboardButton & { hide?: boolean; })[] = [];
