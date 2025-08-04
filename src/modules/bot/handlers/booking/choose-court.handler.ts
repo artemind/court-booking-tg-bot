@@ -2,8 +2,9 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
 import { CourtService } from '../../services/court.service';
 import { CourtNotFoundException } from '../../exceptions/court-not-found.exception';
-import { ChooseDateMessage } from '../../messages/booking/choose-date.message';
 import { BookingSlotService } from '../../services/booking-slot.service';
+import type { Message } from 'telegraf/types';
+import { ChooseDateView } from '../../views/booking/choose-date.view';
 
 export class ChooseCourtHandler {
   constructor(
@@ -14,7 +15,7 @@ export class ChooseCourtHandler {
   }
 
   async register(): Promise<void> {
-    this.bot.action(/^BOOKING_CHOOSE_COURT_(\d+)$/, async (ctx: Context): Promise<void> => {
+    this.bot.action(/^BOOKING_CHOOSE_COURT_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       const selectedCourt = await this.courtService.findById(parseInt(ctx.match[1] || ''));
       if (!selectedCourt) {
         throw new CourtNotFoundException;
@@ -23,7 +24,8 @@ export class ChooseCourtHandler {
         courtId: selectedCourt.id,
         courtName: selectedCourt.name,
       };
-      await ChooseDateMessage.editMessageText(ctx, this.bookingSlotService.generateDateSlots().map(date => date.toDate()));
+
+      return new ChooseDateView(this.bookingSlotService).show(ctx);
     });
   }
 }

@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf';
-import { InlineKeyboardButton } from 'telegraf/types';
+import { InlineKeyboardButton, type Message } from 'telegraf/types';
 import { arrayChunk } from '../../../../utils/array.utils';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import { Context } from '../../context';
@@ -23,18 +23,20 @@ export class ChooseDateMessage {
     return Markup.inlineKeyboard(menuButtons);
   }
 
-  static async editMessageText(ctx: Context, availableDates: Date[]): Promise<void> {
+  static async editMessageText(ctx: Context, availableDates: Date[]): Promise<true | Message.TextMessage> {
 
     await ctx.answerCbQuery();
-    await ctx.editMessageText(this.getMessageText(ctx), {
+
+    return ctx.editMessageText(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });
   }
 
-  static async reply(ctx: Context, availableDates: Date[]): Promise<void> {
+  static async reply(ctx: Context, availableDates: Date[]): Promise<Message.TextMessage> {
     await ctx.answerCbQuery();
-    await ctx.reply(this.getMessageText(ctx), {
+
+    return ctx.reply(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });
