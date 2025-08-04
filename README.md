@@ -113,6 +113,10 @@ npm run lint:fix     # Fix ESLint issues
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
+
 ## 👨‍💻 Author
 
 **Artem Yeremenko**
