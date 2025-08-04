@@ -17,22 +17,24 @@ export class ChooseDateMessage {
     availableDates.forEach((date) => {
       buttons.push(Markup.button.callback(formatDate(date), `BOOKING_CHOOSE_DATE_${date.getTime()}`));
     });
+    const menuButtons = arrayChunk(buttons, 2);
+    menuButtons.push([Markup.button.callback('<< Back', `BOOKING_CHOOSE_DATE_BACK`)]);
 
-    return Markup.inlineKeyboard(arrayChunk(buttons, 2));
+    return Markup.inlineKeyboard(menuButtons);
   }
 
-  static async editMessageText(ctx: Context, availableDates: Date[]) {
+  static async editMessageText(ctx: Context, availableDates: Date[]): Promise<void> {
 
-    ctx.answerCbQuery();
-    ctx.editMessageText(this.getMessageText(ctx), {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });
   }
 
-  static async reply(ctx: Context, availableDates: Date[]) {
-    ctx.answerCbQuery();
-    ctx.reply(this.getMessageText(ctx), {
+  static async reply(ctx: Context, availableDates: Date[]): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.reply(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDates),
       parse_mode: 'Markdown'
     });

@@ -2,11 +2,12 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { CourtService } from '../../services/court.service';
-import { StartBookingHandler } from './start-booking.handler';
 import { BookingService } from '../../services/booking.service';
 import { Booking } from '../../../../generated/prisma';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import dayjs from 'dayjs';
+import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
+import { ChooseCourtView } from '../../views/booking/choose-court.view';
 
 export class ChooseDurationHandler {
   constructor(
@@ -17,22 +18,28 @@ export class ChooseDurationHandler {
   ) {}
 
   async register(): Promise<void> {
+    this.bot.action('BOOKING_CHOOSE_DURATION_BACK', async (ctx: Context): Promise<void> => {
+      delete ctx.session.bookingData!.time;
+      delete ctx.session.bookingData!.dateAndTime;
+      const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData!.courtId!, ctx.session.bookingData!.date!);
+      const timeSlots = this.bookingSlotService.generateAvailableTimeSlots(ctx.session.bookingData!.date!, bookings);
+      await ChooseTimeMessage.editMessageText(ctx, timeSlots);
+    });
+
     this.bot.action(/^BOOKING_CHOOSE_DURATION_(\d+)$/, async (ctx: Context): Promise<void> => {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.dateAndTime) {
-        ctx.reply('An error occurred. Please try again');
-        await new StartBookingHandler(this.bot, this.courtService).show(ctx);
+        await ctx.reply('An error occurred. Please try again');
 
-        return;
+        return new ChooseCourtView(this.courtService).show(ctx);
       }
       const selectedDuration = parseInt(ctx.match[1] || '');
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.dateAndTime);
       const availableDurations = this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings);
 
       if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
-        ctx.reply('Booking with selected parameters unavailable. Please try again');
-        await new StartBookingHandler(this.bot, this.courtService).show(ctx);
+        await ctx.reply('Booking with selected parameters unavailable. Please try again');
 
-        return;
+        return new ChooseCourtView(this.courtService).show(ctx);
       }
 
       ctx.session.bookingData.duration = selectedDuration;
@@ -52,7 +59,7 @@ export class ChooseDurationHandler {
       });
       const bookingData = ctx.session.bookingData;
       ctx.session.bookingData = {};
-      ctx.editMessageText('Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
+      await ctx.editMessageText('Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
         parse_mode: 'Markdown',
       });
     });

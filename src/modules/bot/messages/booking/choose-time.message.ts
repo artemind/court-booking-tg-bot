@@ -16,21 +16,23 @@ export class ChooseTimeMessage {
     availableTime.forEach((time) => {
       buttons.push(Markup.button.callback(time, `BOOKING_CHOOSE_TIME_${time}`));
     });
+    const menuButtons = arrayChunk(buttons, 4);
+    menuButtons.push([Markup.button.callback('<< Back', `BOOKING_CHOOSE_TIME_BACK`)]);
 
-    return Markup.inlineKeyboard(arrayChunk(buttons, 4));
+    return Markup.inlineKeyboard(menuButtons);
   }
 
-  static async editMessageText(ctx: Context, availableTime: string[]) {
-    ctx.answerCbQuery();
-    ctx.editMessageText(this.getMessageText(ctx, availableTime), {
+  static async editMessageText(ctx: Context, availableTime: string[]): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(this.getMessageText(ctx, availableTime), {
       ...this.getKeyboard(availableTime),
       parse_mode: 'Markdown'
     });
   }
 
-  static async reply(ctx: Context, availableTime: string[]) {
-    ctx.answerCbQuery();
-    ctx.reply(this.getMessageText(ctx, availableTime), {
+  static async reply(ctx: Context, availableTime: string[]): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.reply(this.getMessageText(ctx, availableTime), {
       ...this.getKeyboard(availableTime),
       parse_mode: 'Markdown'
     });

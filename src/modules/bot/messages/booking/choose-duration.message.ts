@@ -17,21 +17,23 @@ export class ChooseDurationMessage {
     availableDurations.forEach((duration) => {
       buttons.push(Markup.button.callback(formatMinutes(duration), `BOOKING_CHOOSE_DURATION_${duration}`));
     });
+    const menuButtons = arrayChunk(buttons, 3);
+    menuButtons.push([Markup.button.callback('<< Back', `BOOKING_CHOOSE_DURATION_BACK`)]);
 
-    return Markup.inlineKeyboard(arrayChunk(buttons, 3));
+    return Markup.inlineKeyboard(menuButtons);
   }
 
-  static async editMessageText(ctx: Context, availableDurations: number[]) {
-    ctx.answerCbQuery();
-    ctx.editMessageText(this.getMessageText(ctx), {
+  static async editMessageText(ctx: Context, availableDurations: number[]): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDurations),
       parse_mode: 'Markdown'
     });
   }
 
-  static async reply(ctx: Context, availableDurations: number[]) {
-    ctx.answerCbQuery();
-    ctx.reply(this.getMessageText(ctx), {
+  static async reply(ctx: Context, availableDurations: number[]): Promise<void> {
+    await ctx.answerCbQuery();
+    await ctx.reply(this.getMessageText(ctx), {
       ...this.getKeyboard(availableDurations),
       parse_mode: 'Markdown'
     });
