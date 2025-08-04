@@ -42,7 +42,7 @@ The bot follows a modular architecture with clear separation of concerns:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/artyom-e/court-booking-tg-bot.git
+   git clone https://github.com/artemind/court-booking-tg-bot.git
    cd court-booking-tg-bot
    ```
 
@@ -121,4 +121,4 @@ See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
 
 **Artem Yeremenko**
 
-- GitHub: [@artyom-e](https://github.com/artyom-e)
+- GitHub: [@artemind](https://github.com/artemind)
