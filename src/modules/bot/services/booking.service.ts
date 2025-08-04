@@ -1,4 +1,4 @@
-import { PrismaClient, Booking, Prisma } from '../../../generated/prisma';
+import { PrismaClient, Booking, Prisma, Court } from '../../../generated/prisma';
 import dayjs from 'dayjs';
 
 export class BookingService {
@@ -22,6 +22,23 @@ export class BookingService {
           gte: startDate.toDate(),
           lte: endDate.toDate(),
         }
+      }
+    });
+  }
+
+  async getUpcomingByUserId(userId: number, date: dayjs.Dayjs): Promise<(Booking & {court: Court})[]> {
+    return this.prisma.booking.findMany({
+      where: {
+        userId,
+        dateTill: {
+          gte: date.utc().toDate(),
+        }
+      },
+      include: {
+        court: true,
+      },
+      orderBy: {
+        dateFrom: 'asc',
       }
     });
   }

@@ -16,6 +16,7 @@ import { ChooseDateHandler } from './handlers/booking/choose-date.handler';
 import { ChooseTimeHandler } from './handlers/booking/choose-time.handler';
 import { BookingService } from './services/booking.service';
 import { ChooseDurationHandler } from './handlers/booking/choose-duration.handler';
+import { ShowMyBookingsHandler } from './handlers/my-bookings/show-my-bookings.handler';
 
 export class BotModule implements Module {
 
@@ -46,13 +47,13 @@ export class BotModule implements Module {
   }
 
   async launch(): Promise<void> {
-    this.registerErrorHandler();
+    await this.registerErrorHandler();
     this.registerMiddlewares();
-    this.registerHandlers();
+    await this.registerHandlers();
     await this.bot.launch();
   }
 
-  registerErrorHandler(): void {
+  async registerErrorHandler(): Promise<void> {
     this.bot.catch((err, ctx) => {
       console.error(err);
       if (err instanceof ReplyableException) {
@@ -70,12 +71,13 @@ export class BotModule implements Module {
     this.bot.use(new RestrictAccessMiddleware().apply);
   }
 
-  registerHandlers(): void {
+  async registerHandlers(): Promise<void> {
     new StartHandler(this.bot).register();
-    new StartBookingHandler(this.bot, this.courtService).register();
-    new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
-    new ChooseDateHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
-    new ChooseTimeHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
-    new ChooseDurationHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
+    await new StartBookingHandler(this.bot, this.courtService).register();
+    await new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
+    await new ChooseDateHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
+    await new ChooseTimeHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
+    await new ChooseDurationHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
+    await new ShowMyBookingsHandler(this.bot, this.bookingService).register();
   }
 }
