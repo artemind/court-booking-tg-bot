@@ -4,8 +4,6 @@ services:
     image: node:latest
     volumes:
       - ./:/usr/src/app
-    ports:
-      - "3002:3000"
 
   postgres:
     image: postgres:latest
