@@ -60,7 +60,7 @@ export class ChooseDurationHandler {
       const bookingData = ctx.session.bookingData;
       ctx.session.bookingData = {};
 
-      return ctx.editMessageText('Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
+      return ctx.editMessageText('📌 Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
         parse_mode: 'Markdown',
       });
     });
