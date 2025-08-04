@@ -7,7 +7,7 @@ import { Booking } from '../../../../generated/prisma';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import dayjs from 'dayjs';
 import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
-import { ChooseCourtView } from '../../views/booking/choose-court.view';
+import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
 
 export class ChooseDurationHandler {
@@ -31,7 +31,7 @@ export class ChooseDurationHandler {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.dateAndTime) {
         await ctx.reply('An error occurred. Please try again');
 
-        return new ChooseCourtView(this.courtService).show(ctx);
+        return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
       const selectedDuration = parseInt(ctx.match[1] || '');
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.dateAndTime);
@@ -40,7 +40,7 @@ export class ChooseDurationHandler {
       if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
         await ctx.reply('Booking with selected parameters unavailable. Please try again');
 
-        return new ChooseCourtView(this.courtService).show(ctx);
+        return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
 
       ctx.session.bookingData.duration = selectedDuration;

@@ -8,7 +8,7 @@ import { BookingService } from '../../services/booking.service';
 import { ChooseDurationMessage } from '../../messages/booking/choose-duration.message';
 import dayjs from 'dayjs';
 import { ChooseDateMessage } from '../../messages/booking/choose-date.message';
-import { ChooseCourtView } from '../../views/booking/choose-court.view';
+import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
 
 export class ChooseTimeHandler {
@@ -29,7 +29,7 @@ export class ChooseTimeHandler {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.date) {
         await ctx.reply('An error occurred. Please try again');
 
-        return new ChooseCourtView(this.courtService).show(ctx);
+        return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
       const selectedTime = ctx.match[1]!;
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.date);

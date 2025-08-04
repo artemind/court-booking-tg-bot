@@ -4,7 +4,7 @@ import { CourtService } from '../../services/court.service';
 import { CourtNotFoundException } from '../../exceptions/court-not-found.exception';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import type { Message } from 'telegraf/types';
-import { ChooseDateView } from '../../views/booking/choose-date.view';
+import { ShowChooseDateAction } from '../../actions/booking/show-choose-date.action';
 
 export class ChooseCourtHandler {
   constructor(
@@ -25,7 +25,7 @@ export class ChooseCourtHandler {
         courtName: selectedCourt.name,
       };
 
-      return new ChooseDateView(this.bookingSlotService).show(ctx);
+      return new ShowChooseDateAction(this.bookingSlotService).run(ctx);
     });
   }
 }
