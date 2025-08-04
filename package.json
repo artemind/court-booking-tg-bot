@@ -19,7 +19,12 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "lint": "eslint ./src --ext .ts",
-    "lint:fix": "eslint ./src --ext .ts --fix"
+    "lint:fix": "eslint ./src --ext .ts --fix",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
+    "db:push": "prisma db push",
+    "db:setup": "npm run db:generate && npm run db:migrate"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
