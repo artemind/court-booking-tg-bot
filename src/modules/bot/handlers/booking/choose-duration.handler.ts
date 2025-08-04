@@ -6,9 +6,10 @@ import { BookingService } from '../../services/booking.service';
 import { Booking } from '../../../../generated/prisma';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import dayjs from 'dayjs';
-import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
+import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
+import { ContextManager } from '../../context.manager';
 
 export class ChooseDurationHandler {
   constructor(
@@ -19,12 +20,10 @@ export class ChooseDurationHandler {
   ) {}
 
   async register(): Promise<void> {
-    this.bot.action('BOOKING_CHOOSE_DURATION_BACK', async (ctx: Context): Promise<void> => {
-      delete ctx.session.bookingData!.time;
-      delete ctx.session.bookingData!.dateAndTime;
-      const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData!.courtId!, ctx.session.bookingData!.date!);
-      const timeSlots = this.bookingSlotService.generateAvailableTimeSlots(ctx.session.bookingData!.date!, bookings);
-      await ChooseTimeMessage.editMessageText(ctx, timeSlots);
+    this.bot.action('BOOKING_CHOOSE_DURATION_BACK', async (ctx: Context): Promise<true | Message.TextMessage> => {
+      ContextManager.clearTimeSelection(ctx);
+
+      return new ShowChooseTimeAction(this.bookingService, this.bookingSlotService, this.courtService).run(ctx, false);
     });
 
     this.bot.action(/^BOOKING_CHOOSE_DURATION_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {

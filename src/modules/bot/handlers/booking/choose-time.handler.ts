@@ -2,14 +2,15 @@ import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { CourtService } from '../../services/court.service';
-import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
-import { ChooseDurationMessage } from '../../messages/booking/choose-duration.message';
 import dayjs from 'dayjs';
-import { ChooseDateMessage } from '../../messages/booking/choose-date.message';
 import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
+import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
+import { ContextManager } from '../../context.manager';
+import { ShowChooseDateAction } from '../../actions/booking/show-choose-date.action';
+import { ShowChooseDurationAction } from '../../actions/booking/show-choose-duration.action';
 
 export class ChooseTimeHandler {
   constructor(
@@ -20,9 +21,10 @@ export class ChooseTimeHandler {
   ) {}
 
   async register(): Promise<void> {
-    this.bot.action('BOOKING_CHOOSE_TIME_BACK', async (ctx: Context): Promise<void> => {
-      delete ctx.session.bookingData!.date;
-      await ChooseDateMessage.editMessageText(ctx, this.bookingSlotService.generateDateSlots().map(date => date.toDate()));
+    this.bot.action('BOOKING_CHOOSE_TIME_BACK', async (ctx: Context): Promise<true | Message.TextMessage> => {
+      ContextManager.clearDateSelection(ctx);
+
+      return new ShowChooseDateAction(this.bookingSlotService, this.courtService).run(ctx, false);
     });
 
     this.bot.action(/^BOOKING_CHOOSE_TIME_(\d{2}:\d{2})$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
@@ -37,12 +39,12 @@ export class ChooseTimeHandler {
       if (!availableTimeSlots.includes(selectedTime)) {
         await ctx.reply('Selected time already booked. Please choose another time.');
 
-        return ChooseTimeMessage.reply(ctx, availableTimeSlots);
+        return new ShowChooseTimeAction(this.bookingService, this.bookingSlotService, this.courtService).run(ctx, true);
       }
       ctx.session.bookingData.time = selectedTime;
       ctx.session.bookingData.dateAndTime = dayjs.tz(ctx.session.bookingData.date.format('YYYY-MM-DD') + 'T' + ctx.session.bookingData.time).startOf('minute').utc();
 
-      return ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings));
+      return new ShowChooseDurationAction(this.bookingService, this.bookingSlotService, this.courtService).run(ctx, false);
     });
   }
 }

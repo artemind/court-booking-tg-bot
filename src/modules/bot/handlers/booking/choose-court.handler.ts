@@ -25,7 +25,7 @@ export class ChooseCourtHandler {
         courtName: selectedCourt.name,
       };
 
-      return new ShowChooseDateAction(this.bookingSlotService).run(ctx);
+      return new ShowChooseDateAction(this.bookingSlotService, this.courtService).run(ctx, false);
     });
   }
 }

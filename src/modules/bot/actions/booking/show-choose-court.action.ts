@@ -14,6 +14,6 @@ export class ShowChooseCourtAction {
       return ChooseCourtMessage.reply(ctx, courts);
     }
 
-    return ChooseCourtMessage.editMessageText(ctx, courts)
+    return ChooseCourtMessage.editMessageText(ctx, courts);
   }
 }

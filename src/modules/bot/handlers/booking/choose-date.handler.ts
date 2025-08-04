@@ -9,6 +9,7 @@ import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.a
 import type { Message } from 'telegraf/types';
 import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
 import { ShowChooseDateAction } from '../../actions/booking/show-choose-date.action';
+import { ContextManager } from '../../context.manager';
 
 export class ChooseDateHandler {
   constructor(
@@ -20,9 +21,9 @@ export class ChooseDateHandler {
 
   async register(): Promise<void> {
     this.bot.action('BOOKING_CHOOSE_DATE_BACK', async (ctx: Context): Promise<true | Message.TextMessage> => {
-      ctx.session.bookingData = {};
+      ContextManager.resetBookingData(ctx);
 
-      return new ShowChooseDateAction(this.bookingSlotService).run(ctx);
+      return new ShowChooseDateAction(this.bookingSlotService, this.courtService).run(ctx, false);
     });
 
     this.bot.action(/^BOOKING_CHOOSE_DATE_(\d{13})$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
@@ -38,11 +39,7 @@ export class ChooseDateHandler {
       }
       ctx.session.bookingData.date = selectedDate;
 
-      return new ShowChooseTimeAction(this.bookingService, this.bookingSlotService).run(
-        ctx,
-        ctx.session.bookingData.courtId,
-        selectedDate,
-      );
+      return new ShowChooseTimeAction(this.bookingService, this.bookingSlotService, this.courtService).run(ctx, false);
     });
   }
 }

@@ -5,6 +5,7 @@ export class StartSessionMiddleware {
     if (!ctx.session) {
       ctx.session = {
         sessionStartsAt: new Date(),
+        bookingData: {}
       };
     }
 

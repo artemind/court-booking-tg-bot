@@ -3,6 +3,9 @@ import { formatMinutes } from '../../../utils/time.utils';
 
 export class BookingSummaryFormatter {
   static format(bookingData: BookingData) {
+    if (!bookingData) {
+      return '';
+    }
     const result = [];
     if (bookingData.courtName) {
       result.push('*Court:* ' + bookingData.courtName);
