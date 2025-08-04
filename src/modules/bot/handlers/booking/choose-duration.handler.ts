@@ -8,6 +8,7 @@ import { BookingSummaryFormatter } from '../../formatters/booking-summary.format
 import dayjs from 'dayjs';
 import { ChooseTimeMessage } from '../../messages/booking/choose-time.message';
 import { ChooseCourtView } from '../../views/booking/choose-court.view';
+import type { Message } from 'telegraf/types';
 
 export class ChooseDurationHandler {
   constructor(
@@ -26,7 +27,7 @@ export class ChooseDurationHandler {
       await ChooseTimeMessage.editMessageText(ctx, timeSlots);
     });
 
-    this.bot.action(/^BOOKING_CHOOSE_DURATION_(\d+)$/, async (ctx: Context): Promise<void> => {
+    this.bot.action(/^BOOKING_CHOOSE_DURATION_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.dateAndTime) {
         await ctx.reply('An error occurred. Please try again');
 
@@ -59,7 +60,8 @@ export class ChooseDurationHandler {
       });
       const bookingData = ctx.session.bookingData;
       ctx.session.bookingData = {};
-      await ctx.editMessageText('Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
+
+      return ctx.editMessageText('Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
         parse_mode: 'Markdown',
       });
     });

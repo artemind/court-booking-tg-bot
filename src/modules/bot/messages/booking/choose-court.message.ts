@@ -1,6 +1,6 @@
 import { Context, Markup } from 'telegraf';
 import type { Court } from '../../../../generated/prisma';
-import { InlineKeyboardButton } from 'telegraf/types';
+import { InlineKeyboardButton, type Message } from 'telegraf/types';
 
 export class ChooseCourtMessage {
   private static getMessageText(courts: Court[]): string {
@@ -21,15 +21,15 @@ export class ChooseCourtMessage {
     return Markup.inlineKeyboard([buttons]);
   }
 
-  static async reply(ctx: Context, courts: Court[]): Promise<void> {
-    await ctx.reply(this.getMessageText(courts), {
+  static async reply(ctx: Context, courts: Court[]): Promise<Message.TextMessage> {
+    return ctx.reply(this.getMessageText(courts), {
       ...this.getKeyboard(courts),
       parse_mode: 'Markdown'
     });
   }
 
-  static async editMessageText(ctx: Context, courts: Court[]): Promise<void> {
-    await ctx.editMessageText(this.getMessageText(courts), {
+  static async editMessageText(ctx: Context, courts: Court[]): Promise<true | Message.TextMessage> {
+    return ctx.editMessageText(this.getMessageText(courts), {
       ...this.getKeyboard(courts),
       parse_mode: 'Markdown'
     });

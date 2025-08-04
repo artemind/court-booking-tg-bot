@@ -9,6 +9,7 @@ import { Booking } from '../../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
 import { ChooseCourtMessage } from '../../messages/booking/choose-court.message';
 import { ChooseCourtView } from '../../views/booking/choose-court.view';
+import type { Message } from 'telegraf/types';
 
 export class ChooseDateHandler {
   constructor(
@@ -24,12 +25,12 @@ export class ChooseDateHandler {
       await ChooseCourtMessage.editMessageText(ctx, await this.courtService.all());
     });
 
-    this.bot.action(/^BOOKING_CHOOSE_DATE_(\d{13})$/, async (ctx: Context): Promise<void> => {
+    this.bot.action(/^BOOKING_CHOOSE_DATE_(\d{13})$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       return this.show(ctx);
     });
   }
 
-  async show(ctx: Context): Promise<void> {
+  async show(ctx: Context): Promise<true | Message.TextMessage> {
     if (!ctx.session.bookingData?.courtId) {
       await ctx.reply('An error occurred. Please try again');
 
@@ -43,6 +44,7 @@ export class ChooseDateHandler {
     ctx.session.bookingData.date = selectedDate;
     const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, selectedDate);
     const timeSlots = this.bookingSlotService.generateAvailableTimeSlots(selectedDate, bookings);
-    await ChooseTimeMessage.editMessageText(ctx, timeSlots);
+
+    return ChooseTimeMessage.editMessageText(ctx, timeSlots);
   }
 }
