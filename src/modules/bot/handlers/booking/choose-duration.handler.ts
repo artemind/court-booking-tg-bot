@@ -6,6 +6,7 @@ import { StartBookingHandler } from './start-booking.handler';
 import { BookingService } from '../../services/booking.service';
 import { Booking } from '../../../../generated/prisma';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
+import dayjs from 'dayjs';
 
 export class ChooseDurationHandler {
   constructor(
@@ -26,7 +27,9 @@ export class ChooseDurationHandler {
       const selectedDuration = parseInt(ctx.match[1] || '');
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.dateAndTime);
       const availableDurations = this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings);
-      if (!availableDurations.includes(selectedDuration)) {
+
+
+      if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
         //todo
         console.error('Selected duration already booked. Please choose another duration.');
         return;
