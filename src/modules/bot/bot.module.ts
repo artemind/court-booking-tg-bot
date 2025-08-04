@@ -17,6 +17,7 @@ import { ChooseTimeHandler } from './handlers/booking/choose-time.handler';
 import { BookingService } from './services/booking.service';
 import { ChooseDurationHandler } from './handlers/booking/choose-duration.handler';
 import { ShowMyBookingsHandler } from './handlers/my-bookings/show-my-bookings.handler';
+import { CancelMyBookingHandler } from './handlers/my-bookings/cancel-my-booking.handler';
 
 export class BotModule implements Module {
 
@@ -79,5 +80,6 @@ export class BotModule implements Module {
     await new ChooseTimeHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
     await new ChooseDurationHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
     await new ShowMyBookingsHandler(this.bot, this.bookingService).register();
+    await new CancelMyBookingHandler(this.bot, this.bookingService).register();
   }
 }

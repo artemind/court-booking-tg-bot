@@ -33,4 +33,11 @@ export class ShowMyBookingsMessage {
       parse_mode: 'Markdown'
     });
   }
+
+  static async editMessageText(ctx: Context, bookings: (Booking & {court: Court})[]): Promise<true | Message.TextMessage> {
+    return ctx.editMessageText(this.getMessageText(bookings), {
+      ...this.getKeyboard(bookings),
+      parse_mode: 'Markdown'
+    });
+  }
 }

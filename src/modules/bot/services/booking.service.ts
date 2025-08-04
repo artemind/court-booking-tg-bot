@@ -5,6 +5,14 @@ export class BookingService {
   constructor(private prisma: PrismaClient) {
   }
 
+  async findById(id: number): Promise<Booking | null> {
+    return this.prisma.booking.findUnique({ where: { id } });
+  }
+
+  async deleteById(id: number): Promise<Booking | null> {
+    return this.prisma.booking.delete({ where: { id } });
+  }
+
   async create(data: Prisma.BookingCreateInput): Promise<Booking> {
     return this.prisma.booking.create({
       data,
@@ -26,12 +34,12 @@ export class BookingService {
     });
   }
 
-  async getUpcomingByUserId(userId: number, date: dayjs.Dayjs): Promise<(Booking & {court: Court})[]> {
+  async getUpcomingByUserId(userId: number): Promise<(Booking & {court: Court})[]> {
     return this.prisma.booking.findMany({
       where: {
         userId,
         dateTill: {
-          gte: date.utc().toDate(),
+          gte: dayjs.utc().toDate(),
         }
       },
       include: {
