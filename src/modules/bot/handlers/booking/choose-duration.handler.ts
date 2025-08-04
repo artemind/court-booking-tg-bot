@@ -28,13 +28,13 @@ export class ChooseDurationHandler {
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.dateAndTime);
       const availableDurations = this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings);
 
-
       if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
-        //todo
-        console.error('Selected duration already booked. Please choose another duration.');
+        ctx.reply('Booking with selected parameters unavailable. Please try again');
+        await new StartBookingHandler(this.bot, this.courtService).show(ctx);
+
         return;
       }
-      //todo validate all booking data and check slots available
+
       ctx.session.bookingData.duration = selectedDuration;
       await this.bookingService.create({
         user: {
