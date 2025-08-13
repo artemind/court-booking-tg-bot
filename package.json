@@ -4,14 +4,19 @@
   "description": "",
   "homepage": "https://github.com/artemind/court-booking-tg-bot#readme",
   "bugs": {
-    "url": "https://github.com/artemind/court-booking-tg-bot/issues"
+    "url": "https://github.com/artemind/court-booking-tg-bot/issues",
+    "email": "contact@artemind.dev"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/artemind/court-booking-tg-bot.git"
   },
   "license": "MIT",
-  "author": "Artem Yeremenko",
+  "author": {
+    "name": "Artem Yeremenko",
+    "email": "contact@artemind.dev",
+    "url": "https://artemind.dev"
+  },
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
