@@ -121,4 +121,5 @@ See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
 
 **Artem Yeremenko**
 
+- Website: [artemind.dev](https://artemind.dev)
 - GitHub: [@artemind](https://github.com/artemind)
