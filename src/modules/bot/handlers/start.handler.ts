@@ -7,7 +7,7 @@ export class StartHandler {
 
   register(): void {
     this.bot.start((ctx: Context) => {
-      ctx.reply(`Hi, ${ctx.user!.name}!`, MainMenuKeyboard.build());
+      ctx.reply(`Hi, ${ctx.user!.name}! This bot was created by Artem Y. https://artemind.dev`, MainMenuKeyboard.build());
     });
   }
 }

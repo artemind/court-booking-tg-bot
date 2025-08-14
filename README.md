@@ -121,5 +121,5 @@ See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
 
 **Artem Yeremenko**
 
-- Website: [artemind.dev](https://artemind.dev)
+- Website: [artemind.dev](https://artemind.dev/?utm_source=github&utm_medium=repo_court-booking-tg-bot&utm_campaign=personal_brand)
 - GitHub: [@artemind](https://github.com/artemind)
