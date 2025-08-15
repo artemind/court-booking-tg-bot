@@ -15,11 +15,11 @@ export class BookingFormatter {
     }
 
     return [
-      `*Court:* ${booking.court.name}`,
-      `*Date:* ${formattedDate}`,
-      `*Start Time:* ${startDate.format('HH:mm')}`,
-      `*End Time:* ${endDate.format('HH:mm')}`,
-      `*Duration:* ${formatMinutes(endDate.diff(startDate, 'minutes'))}`,
+      `⛳️ *Court:* ${booking.court.name}`,
+      `📅 *Date:* ${formattedDate}`,
+      `🏁 *Start Time:* ${startDate.format('HH:mm')}`,
+      `🏁 *End Time:* ${endDate.format('HH:mm')}`,
+      `🔄 *Duration:* ${formatMinutes(endDate.diff(startDate, 'minutes'))}`,
     ].join('\n');
   }
 }

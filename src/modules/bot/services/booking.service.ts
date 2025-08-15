@@ -50,4 +50,31 @@ export class BookingService {
       }
     });
   }
+
+  async getBookingsToBeNotified(date: dayjs.Dayjs, minutesBeforeBookingStarts: number, minutesBeforeBookingEnds: number): Promise<(Booking & { user: {telegramId: bigint}, court: Court } )[]> {
+    date = date.utc().startOf('minute');
+
+    return this.prisma.booking.findMany({
+      where: {
+        OR: [
+          {
+            user: { notifyBeforeBookingStarts: true },
+            dateFrom: date.add(minutesBeforeBookingStarts, 'minute').toDate()
+          },
+          {
+            user: { notifyBeforeBookingEnds: true },
+            dateTill: date.add(minutesBeforeBookingEnds, 'minute').toDate()
+          }
+        ]
+      },
+      include: {
+        user: {
+          select: {
+            telegramId: true
+          }
+        },
+        court: true,
+      }
+    });
+  }
 }

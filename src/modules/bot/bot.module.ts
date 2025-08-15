@@ -23,6 +23,7 @@ import { MainMenuHandler } from './handlers/main-menu.handler';
 import {
   ConfigureNotificationPreferencesHandler
 } from './handlers/notification-preferences/configure-notification-preferences.handler';
+import { CronHandler } from './handlers/cron.handler';
 
 export class BotModule implements Module {
 
@@ -79,7 +80,7 @@ export class BotModule implements Module {
 
   async registerHandlers(): Promise<void> {
     new StartHandler(this.bot).register();
-    await new MainMenuHandler(this.bot).register();
+    new MainMenuHandler(this.bot).register();
     await new StartBookingHandler(this.bot, this.courtService).register();
     await new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
     await new ChooseDateHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
@@ -89,5 +90,6 @@ export class BotModule implements Module {
     await new CancelMyBookingHandler(this.bot, this.bookingService).register();
     await new ShowNotificationPreferencesHandler(this.bot).register();
     await new ConfigureNotificationPreferencesHandler(this.bot, this.userService).register();
+    await new CronHandler(this.bot, this.bookingService).register();
   }
 }
