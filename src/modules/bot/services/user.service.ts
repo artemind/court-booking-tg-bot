@@ -23,4 +23,11 @@ export class UserService {
       },
     });
   }
+
+  async partialUpdate(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 }

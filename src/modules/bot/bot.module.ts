@@ -18,6 +18,11 @@ import { BookingService } from './services/booking.service';
 import { ChooseDurationHandler } from './handlers/booking/choose-duration.handler';
 import { ShowMyBookingsHandler } from './handlers/my-bookings/show-my-bookings.handler';
 import { CancelMyBookingHandler } from './handlers/my-bookings/cancel-my-booking.handler';
+import { ShowNotificationPreferencesHandler } from './handlers/notification-preferences/show-notification-preferences.handler';
+import { MainMenuHandler } from './handlers/main-menu.handler';
+import {
+  ConfigureNotificationPreferencesHandler
+} from './handlers/notification-preferences/configure-notification-preferences.handler';
 
 export class BotModule implements Module {
 
@@ -74,6 +79,7 @@ export class BotModule implements Module {
 
   async registerHandlers(): Promise<void> {
     new StartHandler(this.bot).register();
+    await new MainMenuHandler(this.bot).register();
     await new StartBookingHandler(this.bot, this.courtService).register();
     await new ChooseCourtHandler(this.bot, this.courtService, this.bookingSlotService).register();
     await new ChooseDateHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
@@ -81,5 +87,7 @@ export class BotModule implements Module {
     await new ChooseDurationHandler(this.bot, this.courtService, this.bookingService, this.bookingSlotService).register();
     await new ShowMyBookingsHandler(this.bot, this.bookingService).register();
     await new CancelMyBookingHandler(this.bot, this.bookingService).register();
+    await new ShowNotificationPreferencesHandler(this.bot).register();
+    await new ConfigureNotificationPreferencesHandler(this.bot, this.userService).register();
   }
 }
