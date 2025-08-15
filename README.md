@@ -10,6 +10,7 @@ A modern Telegram bot for booking sports courts and facilities. Built with TypeS
 - **Booking History**: Users can view their past and upcoming bookings
 - **Multi-language Support**: Built-in internationalization support
 - **Real-time Availability**: Check court availability in real-time
+- **Notifications:**: Receive notifications about upcoming bookings
 
 ## 🏗️ Architecture
 
@@ -28,6 +29,7 @@ The bot follows a modular architecture with clear separation of concerns:
 - Telegram ID and username tracking
 - Access control and restrictions
 - Booking history
+- Notification Preferences
 
 ### Courts
 - Court information and availability
