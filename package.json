@@ -1,6 +1,5 @@
 {
-  "name": "court-booking-tg-bot",
-  "version": "1.0.2",
+  "name": "@artemind/court-booking-tg-bot",
   "description": "A modern Telegram bot for booking sports courts and facilities. Built with TypeScript, Telegraf, and Prisma ORM.",
   "homepage": "https://github.com/artemind/court-booking-tg-bot#readme",
   "bugs": {
