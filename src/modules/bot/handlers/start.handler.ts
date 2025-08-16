@@ -7,10 +7,10 @@ export class StartHandler {
 
   register(): void {
     this.bot.start(async (ctx: Context) => {
-       await ctx.reply(`Hi, ${ctx.user!.name}! This bot was created by Artem Y. Website: [artemind.dev](https://artemind.dev/?utm_source=tg-bot&utm_medium=court-booking&utm_campaign=personal_brand)`, {
-         ...MainMenuKeyboard.build(),
-         parse_mode: 'Markdown',
-       });
+      await ctx.reply(ctx.i18n.t('greeting', { name: ctx.user!.name }), {
+        ...MainMenuKeyboard.build(ctx.i18n),
+        parse_mode: 'Markdown',
+      });
     });
   }
 }

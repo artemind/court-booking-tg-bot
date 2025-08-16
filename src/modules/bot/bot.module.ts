@@ -24,6 +24,8 @@ import {
   ConfigureNotificationPreferencesHandler
 } from './handlers/notification-preferences/configure-notification-preferences.handler';
 import { CronHandler } from './handlers/cron.handler';
+import { I18n } from '@edjopato/telegraf-i18n';
+import path from 'path';
 
 export class BotModule implements Module {
 
@@ -54,8 +56,8 @@ export class BotModule implements Module {
   }
 
   async launch(): Promise<void> {
-    await this.registerErrorHandler();
     this.registerMiddlewares();
+    await this.registerErrorHandler();
     await this.registerHandlers();
     await this.bot.launch();
   }
@@ -64,15 +66,21 @@ export class BotModule implements Module {
     this.bot.catch((err, ctx) => {
       console.error(err);
       if (err instanceof ReplyableException) {
-        ctx.reply('Ooops, something went wrong: ' + err.message);
+        ctx.reply(`${ctx.i18n.t('exceptions.oops')}: ${err.message}`);
       } else {
-        ctx.reply('Ooops, something went wrong.');
+        ctx.reply(ctx.i18n.t('exceptions.oops'));
       }
     });
   }
 
   registerMiddlewares(): void {
     this.bot.use(session());
+    const i18n = new I18n({
+      defaultLanguage: process.env.APP_LOCALE || 'en',
+      allowMissing: true,
+      directory: path.join(__dirname, '..', '..', '..', 'locales')
+    });
+    this.bot.use(i18n.middleware());
     this.bot.use(new StartSessionMiddleware().apply);
     this.bot.use(new AppendUserMiddleware(this.userService).apply);
     this.bot.use(new RestrictAccessMiddleware().apply);

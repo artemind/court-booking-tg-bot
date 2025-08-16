@@ -5,6 +5,6 @@ import { NotificationPreferencesKeyboard } from '../../keyboards/notification-pr
 
 export class NotificationPreferencesUpdatedMessage {
   static async reply(ctx: Context, user: User): Promise<Message.TextMessage> {
-    return ctx.reply('Notification preferences updated successfully', NotificationPreferencesKeyboard.build(user.notifyBeforeBookingStarts, user.notifyBeforeBookingEnds));
+    return ctx.reply('Notification preferences updated successfully', NotificationPreferencesKeyboard.build(ctx.i18n, user.notifyBeforeBookingStarts, user.notifyBeforeBookingEnds));
   }
 }

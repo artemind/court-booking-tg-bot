@@ -6,10 +6,10 @@ export class RestrictAccessMiddleware {
 
   apply = async (ctx: Context, next: () => Promise<void>): Promise<void> => {
     if (ctx.user === undefined) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException(ctx.i18n);
     }
     if (ctx.user.isAccessRestricted) {
-      throw new AccessRestrictedException();
+      throw new AccessRestrictedException(ctx.i18n);
     }
 
     return next();

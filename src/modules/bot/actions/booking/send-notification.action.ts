@@ -10,13 +10,13 @@ export class SendNotificationAction {
     let message = '';
     const now = dayjs.utc().startOf('minute');
     if (now.add(30, 'minutes').isSame(booking.dateFrom)) {
-      message = '⏳ Your booking starts in 30 minutes';
+      message = `⏳ ${bot.context.i18n!.t('notifications.before_booking_starts', {minutes: 30})}`;
     } else if (now.add(15, 'minutes').isSame(booking.dateTill)) {
-      message = '⌛️ Your booking ends in 15 minutes';
+      message = `⌛️ ${bot.context.i18n!.t('notifications.before_booking_ends', {minutes: 15})}`;
     } else {
       return;
     }
-    const formattedBooking = BookingFormatter.format(booking);
+    const formattedBooking = BookingFormatter.format(bot.context.i18n!, booking);
 
     return bot.telegram.sendMessage(Number(booking.user.telegramId), `*${message}*\n\n${formattedBooking}`, {
       parse_mode: 'Markdown',

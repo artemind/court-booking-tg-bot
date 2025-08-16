@@ -28,14 +28,14 @@ export class ChooseDateHandler {
 
     this.bot.action(/^BOOKING_CHOOSE_DATE_(\d{13})$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       if (!ctx.session.bookingData?.courtId) {
-        await ctx.reply('An error occurred. Please try again');
+        await ctx.reply(ctx.i18n.t('exceptions.an_error_occurred'));
 
         return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
       const selectedDate = dayjs.utc(parseInt(ctx.match[1] || '')).startOf('day');
       const availableDates = this.bookingSlotService.generateDateSlots().map(date => date.format('DD-MM-YYYY'));
       if (!availableDates.includes(selectedDate.format('DD-MM-YYYY'))) {
-        throw new InvalidDateSelectedException;
+        throw new InvalidDateSelectedException(ctx.i18n);
       }
       ctx.session.bookingData.date = selectedDate;
 

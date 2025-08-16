@@ -1,0 +1,54 @@
+{
+  "greeting": "Hi, ${name}! This bot was created by Artem Y. Website: [artemind.dev](https://artemind.dev/?utm_source=tg-bot&utm_medium=court-booking&utm_campaign=personal_brand)",
+  "keyboards": {
+    "main_menu": "Main Menu",
+    "main": {
+      "book": "📅 Book",
+      "my_bookings": "📌 My Bookings",
+      "notification_preferences": "🔔 Notification Preferences"
+    },
+    "notification_preferences": {
+      "notify_before_booking_starts_enabled": "🔔 30 min before the start",
+      "notify_before_booking_starts_disabled": "🔕 30 min before the start",
+      "notify_before_booking_ends_enabled": "🔔 15 min to the end",
+      "notify_before_booking_ends_disabled": "🔕 15 min to the end"
+    }
+  },
+  "exceptions": {
+    "access_restricted": "Access Restricted",
+    "court_not_found": "Court not found",
+    "invalid_date_selected": "Invalid date selected",
+    "user_not_found": "User not found",
+    "an_error_occurred": "An error occurred. Please try again",
+    "oops": "Ooops, something went wrong"
+  },
+  "errors": {
+    "cannot_create_booking_with_selected_parameters": "Booking with selected parameters unavailable. Please try again",
+    "selected_time_already_booked": "Selected time already booked. Please choose another time.",
+    "booking_not_found": "Error. Booking not found.",
+    "not_authorized_to_cancel_booking": "Error. You are not authorized to cancel this booking."
+  },
+  "court": "Court",
+  "date": "Date",
+  "start_time": "Start Time",
+  "end_time": "End Time",
+  "duration": "Duration",
+  "today": "Today",
+  "my_bookings": "My Bookings",
+  "cancel_booking": "Cancel Booking",
+  "notification_preferences": "Notification Preferences",
+  "booking_created": "Booking created successfully",
+  "booking_cancelled": "Booking cancelled successfully",
+  "moved_to_main_menu": "You have been moved to the Main Menu",
+  "choose_court": "Choose court",
+  "choose_date": "Choose date",
+  "choose_time": "Choose time",
+  "choose_duration": "Choose duration",
+  "no_times_available": "There are not available times for this date",
+  "back": "<< Back",
+  "booking_list_is_empty": "You don't have any bookings yet",
+  "notifications": {
+    "before_booking_starts": "Your booking starts in ${minutes} minutes",
+    "before_booking_ends": "Your booking ends in ${minutes} minutes"
+  }
+}

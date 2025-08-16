@@ -1,7 +1,7 @@
 import { ReplyableException } from './replyable.exception';
 
 export class UserNotFoundException extends ReplyableException {
-  constructor() {
-    super('User not found');
-  }
+    protected getI18nKey(): string {
+        return 'exceptions.user_not_found';
+    }
 }

@@ -29,7 +29,7 @@ export class ChooseTimeHandler {
 
     this.bot.action(/^BOOKING_CHOOSE_TIME_(\d{2}:\d{2})$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.date) {
-        await ctx.reply('An error occurred. Please try again');
+        await ctx.reply(ctx.i18n.t('exceptions.an_error_occurred'));
 
         return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
@@ -37,7 +37,7 @@ export class ChooseTimeHandler {
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.date);
       const availableTimeSlots = this.bookingSlotService.generateAvailableTimeSlots(ctx.session.bookingData.date, bookings);
       if (!availableTimeSlots.includes(selectedTime)) {
-        await ctx.reply('Selected time already booked. Please choose another time.');
+        await ctx.reply(ctx.i18n.t('errors.selected_time_already_booked'));
 
         return new ShowChooseTimeAction(this.bookingService, this.bookingSlotService, this.courtService).run(ctx, true);
       }

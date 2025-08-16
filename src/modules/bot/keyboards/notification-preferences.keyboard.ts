@@ -1,30 +1,24 @@
 import { Markup } from 'telegraf';
-import {
-  NOTIFICATION_BEFORE_START_DISABLED,
-  NOTIFICATION_BEFORE_START_ENABLED,
-  NOTIFICATION_BEFORE_END_ENABLED,
-  NOTIFICATION_BEFORE_END_DISABLED
-} from './notification-preferences.items';
-import { MAIN_MENU } from './main-menu.items';
+import { I18nContext } from '@edjopato/telegraf-i18n';
 
 export class NotificationPreferencesKeyboard {
-  static build(beforeStartBookingEnabled: boolean, beforeEndBookingEnabled: boolean) {
+  static build(i18n: I18nContext, beforeStartBookingEnabled: boolean, beforeEndBookingEnabled: boolean) {
     const notificationButtons: string[] = [];
     if (beforeStartBookingEnabled) {
-      notificationButtons.push(NOTIFICATION_BEFORE_START_ENABLED);
+      notificationButtons.push(i18n.t('keyboards.notification_preferences.notify_before_booking_starts_enabled'));
     } else {
-      notificationButtons.push(NOTIFICATION_BEFORE_START_DISABLED);
+      notificationButtons.push(i18n.t('keyboards.notification_preferences.notify_before_booking_starts_disabled'));
     }
 
     if (beforeEndBookingEnabled) {
-      notificationButtons.push(NOTIFICATION_BEFORE_END_ENABLED);
+      notificationButtons.push(i18n.t('keyboards.notification_preferences.notify_before_booking_ends_enabled'));
     } else {
-      notificationButtons.push(NOTIFICATION_BEFORE_END_DISABLED);
+      notificationButtons.push(i18n.t('keyboards.notification_preferences.notify_before_booking_ends_disabled'));
     }
 
     return Markup.keyboard([
       notificationButtons,
-      [MAIN_MENU],
+      [i18n.t('keyboards.main_menu')],
     ])
       .resize()
       .oneTime(false);

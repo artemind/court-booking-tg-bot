@@ -28,7 +28,7 @@ export class ChooseDurationHandler {
 
     this.bot.action(/^BOOKING_CHOOSE_DURATION_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.dateAndTime) {
-        await ctx.reply('An error occurred. Please try again');
+        await ctx.reply(ctx.i18n.t('exceptions.an_error_occurred'));
 
         return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
@@ -37,7 +37,7 @@ export class ChooseDurationHandler {
       const availableDurations = this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings);
 
       if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
-        await ctx.reply('Booking with selected parameters unavailable. Please try again');
+        await ctx.reply(ctx.i18n.t('errors.cannot_create_booking_with_selected_parameters'));
 
         return new ShowChooseCourtAction(this.courtService).run(ctx, true);
       }
@@ -60,7 +60,7 @@ export class ChooseDurationHandler {
       const bookingData = ctx.session.bookingData;
       ctx.session.bookingData = {};
 
-      return ctx.editMessageText('📌 Booking created successfully\n' + BookingSummaryFormatter.format(bookingData), {
+      return ctx.editMessageText(`📌 ${ctx.i18n.t('booking_created')}\n` + BookingSummaryFormatter.format(ctx.i18n, bookingData), {
         parse_mode: 'Markdown',
       });
     });

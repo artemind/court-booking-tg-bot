@@ -1,7 +1,7 @@
 import { ReplyableException } from './replyable.exception';
 
 export class InvalidDateSelectedException extends ReplyableException {
-  constructor() {
-    super('Invalid date selected');
-  }
+    protected getI18nKey(): string {
+        return 'exceptions.invalid_date_selected';
+    }
 }

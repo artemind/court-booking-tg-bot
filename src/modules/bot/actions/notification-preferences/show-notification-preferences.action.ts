@@ -6,6 +6,6 @@ export class ShowNotificationPreferencesAction {
   async run(ctx: Context): Promise<Message.TextMessage> {
     const user = ctx.user!;
 
-    return ctx.reply('Notification Preferences', NotificationPreferencesKeyboard.build(user.notifyBeforeBookingStarts, user.notifyBeforeBookingEnds));
+    return ctx.reply(ctx.i18n.t('notification_preferences'), NotificationPreferencesKeyboard.build(ctx.i18n, user.notifyBeforeBookingStarts, user.notifyBeforeBookingEnds));
   }
 }

@@ -1,7 +1,7 @@
 import { ReplyableException } from './replyable.exception';
 
 export class CourtNotFoundException extends ReplyableException {
-  constructor() {
-    super('Court not found');
-  }
+    protected getI18nKey(): string {
+        return 'exceptions.court_not_found';
+    }
 }

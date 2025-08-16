@@ -18,7 +18,7 @@ export class ChooseCourtHandler {
     this.bot.action(/^BOOKING_CHOOSE_COURT_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       const selectedCourt = await this.courtService.findById(parseInt(ctx.match[1] || ''));
       if (!selectedCourt) {
-        throw new CourtNotFoundException;
+        throw new CourtNotFoundException(ctx.i18n);
       }
       ctx.session.bookingData = {
         courtId: selectedCourt.id,

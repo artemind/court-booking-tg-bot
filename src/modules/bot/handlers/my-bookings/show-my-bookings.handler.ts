@@ -1,9 +1,9 @@
 import { Telegraf } from 'telegraf';
 import { Context } from '../../context';
-import { MY_BOOKINGS } from '../../keyboards/main-menu.items';
 import type { Message } from 'telegraf/types';
 import { BookingService } from '../../services/booking.service';
 import { ShowMyBookingsAction } from '../../actions/my-bookings/show-my-bookings.action';
+import { match } from '@edjopato/telegraf-i18n';
 
 export class ShowMyBookingsHandler {
   constructor(
@@ -12,7 +12,7 @@ export class ShowMyBookingsHandler {
   ) {}
 
   async register(): Promise<void> {
-    this.bot.hears(MY_BOOKINGS, async (ctx: Context): Promise<true | Message.TextMessage> => {
+    this.bot.hears(match('keyboards.main.my_bookings'), async (ctx: Context): Promise<true | Message.TextMessage> => {
       return new ShowMyBookingsAction(this.bookingService).run(ctx, true);
     });
   }
