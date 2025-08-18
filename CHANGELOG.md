@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2025-08-18
+
+### Refactor
+- Integrate InversifyJS for dependency injection
+- Refactor handlers, services, and middlewares for DI support
+
 ## [1.2.0] - 2025-08-16
 
 ### Added

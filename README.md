@@ -16,7 +16,6 @@ A modern Telegram bot for booking sports courts and facilities. Built with TypeS
 
 The bot follows a modular architecture with clear separation of concerns:
 
-- **Modules**: Main application modules (Bot, etc.)
 - **Handlers**: Telegram command and callback handlers
 - **Services**: Business logic layer
 - **Middlewares**: Request processing and validation
