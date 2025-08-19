@@ -74,6 +74,7 @@ export class Bot {
       allowMissing: true,
       directory: path.join(__dirname, '..', '..', 'locales')
     });
+    this.container.bind<I18n>(I18n).toConstantValue(i18n);
     this.bot.use(i18n.middleware());
     this.bot.use(this.container.get<StartSessionMiddleware>(StartSessionMiddleware).middleware());
     this.bot.use(this.container.get<AppendUserMiddleware>(AppendUserMiddleware).middleware());

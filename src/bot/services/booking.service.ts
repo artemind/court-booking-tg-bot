@@ -56,7 +56,7 @@ export class BookingService {
     });
   }
 
-  async getBookingsToBeNotified(date: dayjs.Dayjs, minutesBeforeBookingStarts: number, minutesBeforeBookingEnds: number): Promise<(Booking & { user: {telegramId: bigint}, court: Court } )[]> {
+  async getBookingsToBeNotified(date: dayjs.Dayjs, minutesBeforeBookingStarts: number, minutesBeforeBookingEnds: number): Promise<(Booking & { user: {telegramId: bigint, languageCode: string|null}, court: Court } )[]> {
     date = date.utc().startOf('minute');
 
     return this.prisma.booking.findMany({
@@ -75,7 +75,8 @@ export class BookingService {
       include: {
         user: {
           select: {
-            telegramId: true
+            telegramId: true,
+            languageCode: true,
           }
         },
         court: true,
