@@ -3,6 +3,7 @@ model User {
   telegramId                BigInt    @unique @map("telegram_id")
   telegramUsername          String    @map("telegram_username")
   name                      String
+  languageCode              String?   @map("language_code") @db.VarChar(8)
   isAccessRestricted        Boolean   @default(false) @map("is_access_restricted")
   notifyBeforeBookingStarts Boolean   @default(true) @map("notify_before_booking_starts")
   notifyBeforeBookingEnds   Boolean   @default(true) @map("notify_before_booking_ends")

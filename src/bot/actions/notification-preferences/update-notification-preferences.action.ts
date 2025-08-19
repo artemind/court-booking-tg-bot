@@ -16,7 +16,7 @@ export class UpdateNotificationPreferencesAction {
   ) {}
 
   async enableNotificationBeforeBookingStarts(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.partialUpdate(ctx.user!.id, {
+    const user = await this.userService.update(ctx.user!.id, {
       notifyBeforeBookingStarts: true,
     });
 
@@ -24,7 +24,7 @@ export class UpdateNotificationPreferencesAction {
   }
 
   async disableNotificationBeforeBookingStarts(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.partialUpdate(ctx.user!.id, {
+    const user = await this.userService.update(ctx.user!.id, {
       notifyBeforeBookingStarts: false,
     });
 
@@ -32,7 +32,7 @@ export class UpdateNotificationPreferencesAction {
   }
 
   async enableNotificationBeforeBookingEnds(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.partialUpdate(ctx.user!.id, {
+    const user = await this.userService.update(ctx.user!.id, {
       notifyBeforeBookingEnds: true,
     });
 
@@ -40,7 +40,7 @@ export class UpdateNotificationPreferencesAction {
   }
 
   async disableNotificationBeforeBookingEnds(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.partialUpdate(ctx.user!.id, {
+    const user = await this.userService.update(ctx.user!.id, {
       notifyBeforeBookingEnds: false,
     });
 

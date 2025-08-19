@@ -13,6 +13,7 @@ export class AppendUserMiddleware {
     return async (ctx: Context, next: () => Promise<void>): Promise<void> => {
       const name = `${ctx.from?.first_name ?? ''} ${ctx.from?.last_name ?? ''}`.trim();
       const telegramUsername = ctx.from?.username;
+      const languageCode = ctx.from?.language_code || null;
       const telegramId = ctx.from?.id;
       if (!telegramId || !telegramUsername) {
         return;
@@ -23,10 +24,15 @@ export class AppendUserMiddleware {
         user = await this.userService.create({
           name,
           telegramId,
-          telegramUsername
+          telegramUsername,
+          languageCode
         });
-      } else if (user.telegramUsername !== telegramUsername || user.name !== name) {
-        user = await this.userService.update(user.id, name, telegramUsername);
+      } else if (user.telegramUsername !== telegramUsername || user.name !== name || user.languageCode !== languageCode) {
+        user = await this.userService.update(user.id, {
+          name,
+          telegramUsername,
+          languageCode
+        });
       }
       ctx.user = user;
 

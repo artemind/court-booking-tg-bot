@@ -18,17 +18,7 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { telegramId } });
   }
 
-  async update(id: number, name: string, telegramUsername: string): Promise<User> {
-    return this.prisma.user.update({
-      where: { id },
-      data: {
-        name,
-        telegramUsername
-      },
-    });
-  }
-
-  async partialUpdate(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+  async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({
       where: { id },
       data,
