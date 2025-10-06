@@ -118,6 +118,28 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 See [CHANGELOG.md](CHANGELOG.md) for a list of changes and version history.
 
+## ▶️ Run from Docker Hub
+
+Run the published image directly (the entrypoint assembles DATABASE_URL from parts):
+
+```bash
+docker run -d \
+  --name courtbot \
+  -e BOT_TOKEN="your_telegram_bot_token" \
+  -e DATABASE_HOST="postgres" \
+  -e DATABASE_PORT="5432" \
+  -e DATABASE_NAME="courtbot" \
+  -e DATABASE_USER="postgres" \
+  -e DATABASE_PASSWORD="password" \
+  -e APP_LOCALE="en" \
+  -e APP_TIMEZONE="UTC" \
+  artemind/court-booking-tg-bot:latest
+```
+
+Notes:
+- The container applies Prisma migrations on startup; ensure the database is reachable.
+- Override `:latest` with a specific tag (e.g., `:v1.0.0`) for reproducible deployments.
+
 ## 👨‍💻 Author
 
 **Artem Yeremenko**

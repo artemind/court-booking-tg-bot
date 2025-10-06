@@ -1,0 +1,33 @@
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Git
+.git
+.gitignore
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+/dist
+/tmp
+/src/generated
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# IDE/editor
+.vscode
+.idea
+*.swp
+
+# OS
+.DS_Store
+
