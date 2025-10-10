@@ -70,7 +70,7 @@ The bot follows a modular architecture with clear separation of concerns:
 
 ## 📋 Prerequisites
 
-- Node.js 18+ 
+- Node.js 24+ 
 - PostgreSQL database
 - Telegram Bot Token (from @BotFather)
 

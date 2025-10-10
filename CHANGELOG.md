@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.2] - 2025-10-10
+
+- Update dependencies
+- Add GitHub Actions
+
 ## [2.0.1] - 2025-08-19
 
 ### Fix
