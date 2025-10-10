@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for production build
 
 # 1) Builder: install deps and compile TypeScript
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Install OS deps used by Prisma engines during generate
@@ -25,7 +25,7 @@ RUN mkdir -p dist/generated && cp -r src/generated/* dist/generated/ || true
 
 
 # 2) Production runtime image
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 ARG APP_LOCALE=en
 ARG APP_TIMEZONE="Europe/Kyiv"
