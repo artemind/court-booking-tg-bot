@@ -1,7 +1,7 @@
 services:
   node:
     working_dir: /usr/src/app
-    image: node:latest
+    image: node:24
     volumes:
       - ./:/usr/src/app
 
