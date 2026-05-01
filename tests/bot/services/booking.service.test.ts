@@ -11,6 +11,64 @@ function makeService() {
 }
 
 // ─────────────────────────────────────────────
+// findById
+// ─────────────────────────────────────────────
+describe('findById', () => {
+  it('calls findUnique with the given id', async () => {
+    const { service, prisma } = makeService();
+    const fakeBooking = { id: 5 } as any;
+    prisma.booking.findUnique.mockResolvedValue(fakeBooking);
+
+    const result = await service.findById(5);
+
+    expect(prisma.booking.findUnique).toHaveBeenCalledWith({ where: { id: 5 } });
+    expect(result).toBe(fakeBooking);
+  });
+
+  it('returns null when booking not found', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.findUnique.mockResolvedValue(null);
+
+    const result = await service.findById(999);
+
+    expect(result).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────
+// deleteById
+// ─────────────────────────────────────────────
+describe('deleteById', () => {
+  it('calls delete with the given id and returns the deleted booking', async () => {
+    const { service, prisma } = makeService();
+    const deleted = { id: 3 } as any;
+    prisma.booking.delete.mockResolvedValue(deleted);
+
+    const result = await service.deleteById(3);
+
+    expect(prisma.booking.delete).toHaveBeenCalledWith({ where: { id: 3 } });
+    expect(result).toBe(deleted);
+  });
+});
+
+// ─────────────────────────────────────────────
+// create
+// ─────────────────────────────────────────────
+describe('create', () => {
+  it('calls prisma.booking.create with the provided data', async () => {
+    const { service, prisma } = makeService();
+    const input = { courtId: 1, userId: 2, dateFrom: new Date(), dateTill: new Date() } as any;
+    const created = { id: 10, ...input } as any;
+    prisma.booking.create.mockResolvedValue(created);
+
+    const result = await service.create(input);
+
+    expect(prisma.booking.create).toHaveBeenCalledWith({ data: input });
+    expect(result).toBe(created);
+  });
+});
+
+// ─────────────────────────────────────────────
 // getByDate
 // ─────────────────────────────────────────────
 describe('getByDate', () => {
