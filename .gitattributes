@@ -1,0 +1,29 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Explicitly text files
+*.ts    text eol=lf
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.env*  text eol=lf
+*.sh    text eol=lf
+*.sql   text eol=lf
+*.prisma text eol=lf
+
+# Binary files
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+
+# Linguist — don't count generated/lock files as code
+package-lock.json linguist-generated=true
