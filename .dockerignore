@@ -30,5 +30,10 @@ Dockerfile*
 
 # OS
 .DS_Store
-.claude
 
+# Tests
+tests
+vitest.config.ts
+
+# AI
+.claude
