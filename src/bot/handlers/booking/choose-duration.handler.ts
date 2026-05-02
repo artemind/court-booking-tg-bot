@@ -5,6 +5,7 @@ import { BookingService } from '../../services/booking.service';
 import { Booking } from '../../../generated/prisma';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import dayjs from 'dayjs';
+import { SlotConflictException } from '../../exceptions/slot-conflict.exception';
 import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
 import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
@@ -53,20 +54,20 @@ export class ChooseDurationHandler implements IHandler {
       }
 
       ctx.session.bookingData.duration = selectedDuration;
-      await this.bookingService.create({
-        user: {
-          connect: {
-            id: ctx.user!.id,
-          }
-        },
-        court: {
-          connect: {
-            id: ctx.session.bookingData.courtId,
-          }
-        },
-        dateFrom: ctx.session.bookingData.dateAndTime.toDate(),
-        dateTill: ctx.session.bookingData.dateAndTime.add(selectedDuration, 'minute').toDate(),
-      });
+      try {
+        await this.bookingService.createIfAvailable(
+          ctx.session.bookingData.courtId,
+          ctx.user!.id,
+          ctx.session.bookingData.dateAndTime.toDate(),
+          ctx.session.bookingData.dateAndTime.add(selectedDuration, 'minute').toDate(),
+        );
+      } catch (e) {
+        if (e instanceof SlotConflictException) {
+          await ctx.reply(ctx.i18n.t('errors.cannot_create_booking_with_selected_parameters'));
+          return this.showChooseCourtAction.run(ctx, true);
+        }
+        throw e;
+      }
       const bookingData = ctx.session.bookingData;
       ctx.session.bookingData = {};
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import dayjs from 'dayjs';
 import { ChooseDurationHandler } from '../../../../src/bot/handlers/booking/choose-duration.handler';
+import { SlotConflictException } from '../../../../src/bot/exceptions/slot-conflict.exception';
 import { ContextManager } from '../../../../src/bot/context.manager';
 import { createMockContext } from '../../../helpers/create-mock-context';
 import type { User } from '../../../../src/generated/prisma';
@@ -28,7 +29,7 @@ function makeHandler() {
 
   const bookingService = {
     getByDate: vi.fn().mockResolvedValue([]),
-    create: vi.fn().mockResolvedValue({ id: 100 }),
+    createIfAvailable: vi.fn().mockResolvedValue({ id: 100 }),
   };
   const bookingSlotService = {
     generateAvailableDurations: vi.fn().mockReturnValue([30, SELECTED_DURATION, 90]),
@@ -150,7 +151,7 @@ describe('ChooseDurationHandler', () => {
 
       await selectCb()(ctx);
 
-      expect(bookingService.create).not.toHaveBeenCalled();
+      expect(bookingService.createIfAvailable).not.toHaveBeenCalled();
     });
 
     it('creates booking with correct data on success', async () => {
@@ -160,12 +161,24 @@ describe('ChooseDurationHandler', () => {
 
       await selectCb()(ctx);
 
-      expect(bookingService.create).toHaveBeenCalledWith({
-        user: { connect: { id: fakeUser.id } },
-        court: { connect: { id: 1 } },
-        dateFrom: FUTURE_DATE_AND_TIME.toDate(),
-        dateTill: FUTURE_DATE_AND_TIME.add(SELECTED_DURATION, 'minute').toDate(),
-      });
+      expect(bookingService.createIfAvailable).toHaveBeenCalledWith(
+        1,
+        fakeUser.id,
+        FUTURE_DATE_AND_TIME.toDate(),
+        FUTURE_DATE_AND_TIME.add(SELECTED_DURATION, 'minute').toDate(),
+      );
+    });
+
+    it('shows error and redirects to court selection when slot is taken concurrently', async () => {
+      const { handler, bookingService, showChooseCourtAction, selectCb } = makeHandler();
+      await handler.register();
+      bookingService.createIfAvailable.mockRejectedValue(new SlotConflictException());
+      const ctx = ctxWithDuration(`${SELECTED_DURATION}`);
+
+      await selectCb()(ctx);
+
+      expect(ctx.reply).toHaveBeenCalledWith('errors.cannot_create_booking_with_selected_parameters');
+      expect(showChooseCourtAction.run).toHaveBeenCalledWith(ctx, true);
     });
 
     it('clears session bookingData after creating booking', async () => {
