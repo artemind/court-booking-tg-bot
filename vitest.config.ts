@@ -8,6 +8,9 @@ export default defineConfig({
     setupFiles: ['./tests/helpers/setup.ts'],
     include: ['tests/**/*.test.ts'],
     oxc: false,
+    coverage: {
+      exclude: ['src/generated/**'],
+    },
   },
   plugins: [
     swc.vite({
