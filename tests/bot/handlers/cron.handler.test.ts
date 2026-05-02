@@ -71,7 +71,7 @@ describe('CronHandler', () => {
 
     it('calls getBookingsToBeNotified with the correct window params', async () => {
       const { handler, bookingService } = makeHandler();
-      await runScheduledCallback(handler, bookingService);
+      await runScheduledCallback(handler);
       expect(bookingService.getBookingsToBeNotified).toHaveBeenCalledOnce();
       const [, minutesBefore, minutesBeforeEnd] = bookingService.getBookingsToBeNotified.mock.calls[0]!;
       expect(minutesBefore).toBe(30);
@@ -81,14 +81,14 @@ describe('CronHandler', () => {
     it('calls sendNotificationAction.run for each booking returned', async () => {
       const { handler, bookingService, sendNotificationAction } = makeHandler();
       bookingService.getBookingsToBeNotified.mockResolvedValue([fakeBooking, fakeBooking]);
-      await runScheduledCallback(handler, bookingService);
+      await runScheduledCallback(handler);
       expect(sendNotificationAction.run).toHaveBeenCalledTimes(2);
     });
 
     it('does not call sendNotificationAction.run when no bookings are returned', async () => {
       const { handler, bookingService, sendNotificationAction } = makeHandler();
       bookingService.getBookingsToBeNotified.mockResolvedValue([]);
-      await runScheduledCallback(handler, bookingService);
+      await runScheduledCallback(handler);
       expect(sendNotificationAction.run).not.toHaveBeenCalled();
     });
   });
