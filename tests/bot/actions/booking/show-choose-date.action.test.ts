@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import dayjs from 'dayjs';
 import { ShowChooseDateAction } from '../../../../src/bot/actions/booking/show-choose-date.action';
-import { ShowChooseCourtAction } from '../../../../src/bot/actions/booking/show-choose-court.action';
 import { ChooseDateMessage } from '../../../../src/bot/messages/booking/choose-date.message';
 import { createMockContext } from '../../../helpers/create-mock-context';
 
