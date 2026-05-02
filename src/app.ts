@@ -10,51 +10,41 @@ import { buildProviderModule } from '@inversifyjs/binding-decorators';
 import { Telegraf } from 'telegraf';
 import { I18n } from '@edjopato/telegraf-i18n';
 
-class App {
-  private container: Container;
-
-  constructor() {
-    this.container = new Container();
-    this.init();
-  }
-
-  private async init(): Promise<void> {
-    config();
-    this.configureDayjs();
-    await this.bindDependencies();
-  }
-
-  private configureDayjs(): void {
-    dayjs.locale(process.env.APP_LOCALE || 'en');
-    dayjs.extend(utc);
-    dayjs.extend(timezone);
-    dayjs.tz.setDefault(process.env.APP_TIMEZONE || 'UTC');
-  }
-
-  private async bindDependencies(): Promise<void> {
-    const token = process.env.BOT_TOKEN;
-    if (!token) throw new Error('BOT_TOKEN is not defined');
-    this.container.bind<PrismaClient>(PrismaClient).toConstantValue(new PrismaClient());
-    this.container.bind<string>('APP_LOCALE').toConstantValue(process.env.APP_LOCALE || 'en');
-    this.container.bind<string>('BOOKING_AVAILABLE_FROM_TIME').toConstantValue(process.env.BOOKING_AVAILABLE_FROM_TIME || '07:00');
-    this.container.bind<string>('BOOKING_AVAILABLE_TO_TIME').toConstantValue(process.env.BOOKING_AVAILABLE_TO_TIME || '23:59');
-    this.container.bind<number>('BOOKING_SLOT_SIZE_IN_MINUTES').toConstantValue(parseInt(process.env.BOOKING_SLOT_SIZE_IN_MINUTES || '30'));
-    this.container.bind<number>('BOOKING_MIN_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MIN_DURATION_MINUTES || '30'));
-    this.container.bind<number>('BOOKING_MAX_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MAX_DURATION_MINUTES || '180'));
-    this.container.bind<Telegraf>(Telegraf).toConstantValue(new Telegraf(token));
-    const i18n = new I18n({
-      defaultLanguage: process.env.APP_LOCALE || 'en',
-      allowMissing: true,
-      directory: path.join(__dirname, '..', 'locales'),
-    });
-    this.container.bind<I18n>(I18n).toConstantValue(i18n);
-    await this.container.load(buildProviderModule());
-  }
-
-  async start(): Promise<void> {
-    const bot = new Bot(this.container);
-    await bot.launch();
-  }
+function configureDayjs(): void {
+  dayjs.locale(process.env.APP_LOCALE || 'en');
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  dayjs.tz.setDefault(process.env.APP_TIMEZONE || 'UTC');
 }
 
-(new App()).start();
+async function buildContainer(): Promise<Container> {
+  const token = process.env.BOT_TOKEN;
+  if (!token) throw new Error('BOT_TOKEN is not defined');
+
+  const container = new Container();
+  container.bind<PrismaClient>(PrismaClient).toConstantValue(new PrismaClient());
+  container.bind<string>('APP_LOCALE').toConstantValue(process.env.APP_LOCALE || 'en');
+  container.bind<string>('BOOKING_AVAILABLE_FROM_TIME').toConstantValue(process.env.BOOKING_AVAILABLE_FROM_TIME || '07:00');
+  container.bind<string>('BOOKING_AVAILABLE_TO_TIME').toConstantValue(process.env.BOOKING_AVAILABLE_TO_TIME || '23:59');
+  container.bind<number>('BOOKING_SLOT_SIZE_IN_MINUTES').toConstantValue(parseInt(process.env.BOOKING_SLOT_SIZE_IN_MINUTES || '30'));
+  container.bind<number>('BOOKING_MIN_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MIN_DURATION_MINUTES || '30'));
+  container.bind<number>('BOOKING_MAX_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MAX_DURATION_MINUTES || '180'));
+  container.bind<Telegraf>(Telegraf).toConstantValue(new Telegraf(token));
+  container.bind<I18n>(I18n).toConstantValue(new I18n({
+    defaultLanguage: process.env.APP_LOCALE || 'en',
+    allowMissing: true,
+    directory: path.join(__dirname, '..', 'locales'),
+  }));
+  await container.load(buildProviderModule());
+  return container;
+}
+
+async function bootstrap(): Promise<void> {
+  config();
+  configureDayjs();
+  const container = await buildContainer();
+  const bot = new Bot(container);
+  await bot.launch();
+}
+
+bootstrap().catch(console.error);
