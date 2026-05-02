@@ -63,7 +63,7 @@ describe('CronHandler', () => {
   });
 
   describe('scheduled callback', () => {
-    async function runScheduledCallback(handler: CronHandler, bookingService: { getBookingsToBeNotified: ReturnType<typeof vi.fn> }) {
+    async function runScheduledCallback(handler: CronHandler) {
       await handler.register();
       const scheduledCb = (nodeCron.schedule as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => Promise<void>;
       await scheduledCb();
