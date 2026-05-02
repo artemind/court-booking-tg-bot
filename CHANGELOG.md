@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-05-02
+
+### Added
+- Testing infrastructure with Vitest: configuration, helpers (`create-mock-context`, `create-mock-prisma`), and coverage reporting
+- Unit tests for all services: `BookingService`, `BookingSlotService`, `CourtService`, `UserService`
+- Unit tests for all bot actions: booking flow, my-bookings, notification preferences, send-notification
+- Unit tests for all bot handlers: start, main-menu, cron, booking flow, my-bookings, notification preferences
+- Unit tests for middlewares: `AppendUserMiddleware`, `RestrictAccessMiddleware`, `StartSessionMiddleware`
+- Unit tests for messages, keyboards, and formatters
+- Unit tests for utility functions: array, date, and time utils
+
+### Fixed
+- Booking slot generation logic to correctly handle day boundary and configurable slot size
+- ESLint configuration to include the `tests/` directory
+
+### Chore
+- Added `.gitattributes` for consistent line endings and Linguist configuration
+- Updated `.dockerignore` to exclude test-related files and AI metadata
+
 ## [2.0.2] - 2025-10-10
 
 - Update dependencies
