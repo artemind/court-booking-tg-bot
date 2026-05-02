@@ -17,7 +17,6 @@ import { MainMenuHandler } from './handlers/main-menu.handler';
 import { ConfigureNotificationPreferencesHandler } from './handlers/notification-preferences/configure-notification-preferences.handler';
 import { CronHandler } from './handlers/cron.handler';
 import { I18n } from '@edjopato/telegraf-i18n';
-import path from 'path';
 import { injectable, Container } from 'inversify';
 import { IHandlerConstructor } from './handlers/handler.interface';
 import { provide } from '@inversifyjs/binding-decorators';
@@ -69,12 +68,7 @@ export class Bot {
 
   private registerMiddlewares(): void {
     this.bot.use(session());
-    const i18n = new I18n({
-      defaultLanguage: process.env.APP_LOCALE || 'en',
-      allowMissing: true,
-      directory: path.join(__dirname, '..', '..', 'locales')
-    });
-    this.container.bind<I18n>(I18n).toConstantValue(i18n);
+    const i18n = this.container.get<I18n>(I18n);
     this.bot.use(i18n.middleware());
     this.bot.use(this.container.get<StartSessionMiddleware>(StartSessionMiddleware).middleware());
     this.bot.use(this.container.get<AppendUserMiddleware>(AppendUserMiddleware).middleware());

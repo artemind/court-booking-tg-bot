@@ -203,7 +203,7 @@ describe('ChooseDurationHandler', () => {
       expect(text).toContain('booking_created');
     });
 
-    it('uses NaN duration when match[1] is undefined, causing error redirect', async () => {
+    it('redirects to court selection when match[1] is undefined', async () => {
       const { handler, bookingSlotService, showChooseCourtAction, selectCb } = makeHandler();
       await handler.register();
       bookingSlotService.generateAvailableDurations.mockReturnValue([30, 60]);

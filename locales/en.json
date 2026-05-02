@@ -39,6 +39,7 @@
   "notification_preferences": "Notification Preferences",
   "booking_created": "Booking created successfully",
   "booking_cancelled": "Booking cancelled successfully",
+  "notification_preferences_updated": "Notification preferences updated successfully",
   "moved_to_main_menu": "You have been moved to the Main Menu",
   "choose_court": "Choose court",
   "choose_date": "Choose date",

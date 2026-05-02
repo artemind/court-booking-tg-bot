@@ -167,7 +167,7 @@ describe('SendNotificationAction', () => {
       await action.run(bot, booking);
 
       const [telegramId] = bot.telegram.sendMessage.mock.calls[0]!;
-      expect(telegramId).toBe(999888);
+      expect(telegramId).toBe('999888');
     });
   });
 });

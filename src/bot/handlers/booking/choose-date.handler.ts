@@ -10,6 +10,7 @@ import { ContextManager } from '../../context.manager';
 import { inject, injectable } from 'inversify';
 import { IHandler } from '../handler.interface';
 import { provide } from '@inversifyjs/binding-decorators';
+import { parseIntSafe } from '../../../utils/parse.utils';
 
 @injectable()
 @provide()
@@ -38,7 +39,9 @@ export class ChooseDateHandler implements IHandler{
 
         return this.showChooseCourtAction.run(ctx, true);
       }
-      const selectedDate = dayjs.utc(parseInt(ctx.match[1] || '')).startOf('day');
+      const timestamp = parseIntSafe(ctx.match[1]);
+      if (timestamp === null) throw new InvalidDateSelectedException(ctx.i18n);
+      const selectedDate = dayjs.utc(timestamp).startOf('day');
       const availableDates = this.bookingSlotService.generateDateSlots().map(date => date.format('DD-MM-YYYY'));
       if (!availableDates.includes(selectedDate.format('DD-MM-YYYY'))) {
         throw new InvalidDateSelectedException(ctx.i18n);

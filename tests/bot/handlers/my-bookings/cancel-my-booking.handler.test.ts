@@ -145,10 +145,9 @@ describe('CancelMyBookingHandler', () => {
       expect(ctx.reply).toHaveBeenCalledWith('booking_cancelled');
     });
 
-    it('calls findById with NaN when match[1] is undefined', async () => {
+    it('shows booking_not_found without calling findById when match[1] is undefined', async () => {
       const { handler, bookingService, getCb } = makeHandler();
       await handler.register();
-      bookingService.findById.mockResolvedValue(null);
 
       const ctx = createMockContext({
         user: fakeUser,
@@ -156,7 +155,7 @@ describe('CancelMyBookingHandler', () => {
       });
       await getCb()(ctx);
 
-      expect(bookingService.findById).toHaveBeenCalledWith(NaN);
+      expect(bookingService.findById).not.toHaveBeenCalled();
       expect(ctx.editMessageText).toHaveBeenCalledWith('errors.booking_not_found');
     });
   });

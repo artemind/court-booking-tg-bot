@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { IHandler } from '../handler.interface';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
+import { parseIntSafe } from '../../../utils/parse.utils';
 
 @injectable()
 @provide()
@@ -23,7 +24,8 @@ export class CancelMyBookingHandler implements IHandler{
 
   async register(): Promise<void> {
     this.bot.action(/^CANCEL_MY_BOOKING_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
-      const bookingId = parseInt(ctx.match[1] || '');
+      const bookingId = parseIntSafe(ctx.match[1]);
+      if (bookingId === null) return ctx.editMessageText(ctx.i18n.t('errors.booking_not_found'));
       const booking: Booking|null = await this.bookingService.findById(bookingId);
       if (!booking) {
         return ctx.editMessageText(ctx.i18n.t('errors.booking_not_found'));

@@ -7,6 +7,7 @@ import { BookingSummaryFormatter } from '../../formatters/booking-summary.format
 import dayjs from 'dayjs';
 import { SlotConflictException } from '../../exceptions/slot-conflict.exception';
 import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
+import { parseIntSafe } from '../../../utils/parse.utils';
 import type { Message } from 'telegraf/types';
 import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
 import { ContextManager } from '../../context.manager';
@@ -43,11 +44,11 @@ export class ChooseDurationHandler implements IHandler {
 
         return this.showChooseCourtAction.run(ctx, true);
       }
-      const selectedDuration = parseInt(ctx.match[1] || '');
+      const selectedDuration = parseIntSafe(ctx.match[1]);
       const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.dateAndTime);
       const availableDurations = this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings);
 
-      if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || !availableDurations.includes(selectedDuration)) {
+      if (ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') || selectedDuration === null || !availableDurations.includes(selectedDuration)) {
         await ctx.reply(ctx.i18n.t('errors.cannot_create_booking_with_selected_parameters'));
 
         return this.showChooseCourtAction.run(ctx, true);

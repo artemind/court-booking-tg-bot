@@ -32,7 +32,7 @@ export class SendNotificationAction {
     }
     const formattedBooking = BookingFormatter.format(this.i18n, booking, languageCode);
 
-    return bot.telegram.sendMessage(Number(booking.user.telegramId), `*${message}*\n\n${formattedBooking}`, {
+    return bot.telegram.sendMessage(booking.user.telegramId.toString(), `*${message}*\n\n${formattedBooking}`, {
       parse_mode: 'Markdown',
     });
   }

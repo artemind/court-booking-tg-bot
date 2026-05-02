@@ -2,11 +2,13 @@ import { config } from 'dotenv';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import path from 'path';
 import { Container } from 'inversify';
 import { PrismaClient } from './generated/prisma';
 import { Bot } from './bot/bot';
 import { buildProviderModule } from '@inversifyjs/binding-decorators';
 import { Telegraf } from 'telegraf';
+import { I18n } from '@edjopato/telegraf-i18n';
 
 class App {
   private container: Container;
@@ -40,6 +42,12 @@ class App {
     this.container.bind<number>('BOOKING_MIN_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MIN_DURATION_MINUTES || '30'));
     this.container.bind<number>('BOOKING_MAX_DURATION_MINUTES').toConstantValue(parseInt(process.env.BOOKING_MAX_DURATION_MINUTES || '180'));
     this.container.bind<Telegraf>(Telegraf).toConstantValue(new Telegraf(token));
+    const i18n = new I18n({
+      defaultLanguage: process.env.APP_LOCALE || 'en',
+      allowMissing: true,
+      directory: path.join(__dirname, '..', 'locales'),
+    });
+    this.container.bind<I18n>(I18n).toConstantValue(i18n);
     await this.container.load(buildProviderModule());
   }
 
