@@ -12,4 +12,11 @@ export default tseslint.config(
     {
         "ignores": ["src/generated/*"]
     },
+    {
+        files: ["tests/**/*.ts"],
+        rules: {
+            "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-unsafe-function-type": "off",
+        }
+    },
 );

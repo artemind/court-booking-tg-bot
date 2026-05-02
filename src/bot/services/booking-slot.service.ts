@@ -24,7 +24,7 @@ export class BookingSlotService {
     const slots: dayjs.Dayjs[] = [];
     let currentDate = dayjs().startOf('day');
     const endDate = currentDate.clone().add(days, 'day');
-    while (currentDate <= endDate) {
+    while (currentDate < endDate) {
       slots.push(currentDate);
       currentDate = currentDate.add(1, 'day');
     }
@@ -50,7 +50,14 @@ export class BookingSlotService {
     let startTime = this.bookingAvailableFromTime;
     if (date.startOf('day').utc().isSame(dayjs().startOf('day').utc(), 'day')) {
       const now = dayjs().tz();
-      startTime = now.startOf('hour').add(Math.floor(now.minute() / 30) * 30, 'minute').format('HH:mm');
+      const totalMinutes = now.hour() * 60 + now.minute();
+      const nextSlotTotal = Math.floor(totalMinutes / this.bookingSlotSizeMins) * this.bookingSlotSizeMins + this.bookingSlotSizeMins;
+      if (nextSlotTotal >= 24 * 60) {
+        return [];
+      }
+      const h = Math.floor(nextSlotTotal / 60);
+      const m = nextSlotTotal % 60;
+      startTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
     const allSlots: string[] = this.generateTimeSlots(startTime, this.bookingAvailableToTime);
     const bookedSlots: string[] = this.getBookedTimeSlots(bookings);

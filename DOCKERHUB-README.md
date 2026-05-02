@@ -70,26 +70,26 @@ volumes:
 
 ### Required Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `BOT_TOKEN` | Telegram bot token from BotFather | `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz` |
-| `DATABASE_HOST` | PostgreSQL host | `postgres` |
-| `DATABASE_PORT` | PostgreSQL port | `5432` |
-| `DATABASE_NAME` | Database name | `courtbot` |
-| `DATABASE_USER` | Database user | `postgres` |
-| `DATABASE_PASSWORD` | Database password | `password` |
+| Variable            | Description                       | Example                                 |
+|---------------------|-----------------------------------|-----------------------------------------|
+| `BOT_TOKEN`         | Telegram bot token from BotFather | `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz` |
+| `DATABASE_HOST`     | PostgreSQL host                   | `postgres`                              |
+| `DATABASE_PORT`     | PostgreSQL port                   | `5432`                                  |
+| `DATABASE_NAME`     | Database name                     | `courtbot`                              |
+| `DATABASE_USER`     | Database user                     | `postgres`                              |
+| `DATABASE_PASSWORD` | Database password                 | `password`                              |
 
 ### Optional Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APP_LOCALE` | Application locale | `en` |
-| `APP_TIMEZONE` | Application timezone | `UTC` |
-| `BOOKING_AVAILABLE_FROM_TIME` | Booking start time | `07:00` |
-| `BOOKING_AVAILABLE_TO_TIME` | Booking end time | `23:59` |
-| `BOOKING_SLOT_SIZE_IN_MINUTES` | Time slot size | `30` |
-| `BOOKING_MIN_DURATION_MINUTES` | Minimum booking duration | `30` |
-| `BOOKING_MAX_DURATION_MINUTES` | Maximum booking duration | `180` |
+| Variable                       | Description              | Default |
+|--------------------------------|--------------------------|---------|
+| `APP_LOCALE`                   | Application locale       | `en`    |
+| `APP_TIMEZONE`                 | Application timezone     | `UTC`   |
+| `BOOKING_AVAILABLE_FROM_TIME`  | Booking start time       | `07:00` |
+| `BOOKING_AVAILABLE_TO_TIME`    | Booking end time         | `23:59` |
+| `BOOKING_SLOT_SIZE_IN_MINUTES` | Time slot size           | `30`    |
+| `BOOKING_MIN_DURATION_MINUTES` | Minimum booking duration | `30`    |
+| `BOOKING_MAX_DURATION_MINUTES` | Maximum booking duration | `180`   |
 
 ## 🏗️ How It Works
 
