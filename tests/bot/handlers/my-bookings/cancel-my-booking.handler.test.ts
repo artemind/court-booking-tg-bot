@@ -144,5 +144,20 @@ describe('CancelMyBookingHandler', () => {
 
       expect(ctx.reply).toHaveBeenCalledWith('booking_cancelled');
     });
+
+    it('calls findById with NaN when match[1] is undefined', async () => {
+      const { handler, bookingService, getCb } = makeHandler();
+      await handler.register();
+      bookingService.findById.mockResolvedValue(null);
+
+      const ctx = createMockContext({
+        user: fakeUser,
+        match: [''] as unknown as RegExpExecArray,
+      });
+      await getCb()(ctx);
+
+      expect(bookingService.findById).toHaveBeenCalledWith(NaN);
+      expect(ctx.editMessageText).toHaveBeenCalledWith('errors.booking_not_found');
+    });
   });
 });

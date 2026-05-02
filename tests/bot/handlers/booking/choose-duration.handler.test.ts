@@ -189,5 +189,23 @@ describe('ChooseDurationHandler', () => {
       const [text] = (ctx.editMessageText as ReturnType<typeof vi.fn>).mock.calls[0]!;
       expect(text).toContain('booking_created');
     });
+
+    it('uses NaN duration when match[1] is undefined, causing error redirect', async () => {
+      const { handler, bookingSlotService, showChooseCourtAction, selectCb } = makeHandler();
+      await handler.register();
+      bookingSlotService.generateAvailableDurations.mockReturnValue([30, 60]);
+      const ctx = createMockContext({
+        user: fakeUser,
+        match: [''] as unknown as RegExpExecArray,
+        session: {
+          sessionStartsAt: new Date(),
+          bookingData: { courtId: 1, dateAndTime: FUTURE_DATE_AND_TIME },
+        },
+      });
+
+      await selectCb()(ctx);
+
+      expect(showChooseCourtAction.run).toHaveBeenCalledWith(ctx, true);
+    });
   });
 });

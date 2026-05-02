@@ -114,5 +114,16 @@ describe('ChooseDateHandler', () => {
 
       expect(showChooseTimeAction.run).toHaveBeenCalledWith(ctx, false);
     });
+
+    it('uses NaN timestamp when match[1] is undefined, causing InvalidDateSelectedException', async () => {
+      const { handler, selectCb } = makeHandler();
+      await handler.register();
+      const ctx = createMockContext({
+        match: [''] as unknown as RegExpExecArray,
+        session: { sessionStartsAt: new Date(), bookingData: { courtId: 1 } },
+      });
+
+      await expect(selectCb()(ctx)).rejects.toBeInstanceOf(InvalidDateSelectedException);
+    });
   });
 });
