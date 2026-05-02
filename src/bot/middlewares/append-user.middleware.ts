@@ -1,5 +1,6 @@
 import { UserService } from '../services/user.service';
 import { Context } from '../context';
+import { UserNotFoundException } from '../exceptions/user-not-found.exception';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 
@@ -16,7 +17,7 @@ export class AppendUserMiddleware {
       const languageCode = ctx.from?.language_code || null;
       const telegramId = ctx.from?.id;
       if (!telegramId || !telegramUsername) {
-        return;
+        throw new UserNotFoundException(ctx.i18n);
       }
 
       let user = await this.userService.findByTelegramId(telegramId);

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AppendUserMiddleware } from '../../../src/bot/middlewares/append-user.middleware';
+import { UserNotFoundException } from '../../../src/bot/exceptions/user-not-found.exception';
 import { createMockContext } from '../../helpers/create-mock-context';
 import type { UserService } from '../../../src/bot/services/user.service';
 import type { User } from '../../../src/generated/prisma';
@@ -42,16 +43,16 @@ describe('AppendUserMiddleware', () => {
   describe('early exit cases', () => {
     it('stops the chain (does not call next) when ctx.from is absent', async () => {
       const ctx = createMockContext({ from: undefined } as any);
-      await middleware(ctx, next);
+      await expect(middleware(ctx, next)).rejects.toBeInstanceOf(UserNotFoundException);
       expect(next).not.toHaveBeenCalled();
-      expect(ctx.user).toBeUndefined();
+      expect(userService.findByTelegramId).not.toHaveBeenCalled();
     });
 
-    it('stops the chain when ctx.from has no username', async () => {
+    it('throws UserNotFoundException when ctx.from has no username', async () => {
       const ctx = createMockContext({
         from: { id: 1, first_name: 'Test', is_bot: false } as any,
       });
-      await middleware(ctx, next);
+      await expect(middleware(ctx, next)).rejects.toBeInstanceOf(UserNotFoundException);
       expect(next).not.toHaveBeenCalled();
       expect(userService.findByTelegramId).not.toHaveBeenCalled();
     });
