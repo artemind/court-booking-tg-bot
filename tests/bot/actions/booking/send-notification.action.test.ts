@@ -55,7 +55,7 @@ describe('SendNotificationAction', () => {
       const result = await action.run(bot, booking);
 
       expect(bot.telegram.sendMessage).toHaveBeenCalledOnce();
-      expect(result).toBeDefined();
+      expect(result).toEqual({ message_id: 42 });
     });
 
     it('includes before_booking_starts key in the message', async () => {
@@ -87,7 +87,7 @@ describe('SendNotificationAction', () => {
       const result = await action.run(bot, booking);
 
       expect(bot.telegram.sendMessage).toHaveBeenCalledOnce();
-      expect(result).toBeDefined();
+      expect(result).toEqual({ message_id: 42 });
     });
 
     it('includes before_booking_ends key in the message', async () => {

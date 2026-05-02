@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RestrictAccessMiddleware } from '../../../src/bot/middlewares/restrict-access.middleware';
 import { UserNotFoundException } from '../../../src/bot/exceptions/user-not-found.exception';
 import { AccessRestrictedException } from '../../../src/bot/exceptions/access-restricted.exception';
@@ -23,7 +23,11 @@ function mockUser(overrides: Partial<User> = {}): User {
 
 describe('RestrictAccessMiddleware', () => {
   const middleware = new RestrictAccessMiddleware().middleware();
-  const next = vi.fn().mockResolvedValue(undefined);
+  let next: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    next = vi.fn().mockResolvedValue(undefined);
+  });
 
   it('throws UserNotFoundException when ctx.user is not set', async () => {
     const ctx = createMockContext();
@@ -47,7 +51,6 @@ describe('RestrictAccessMiddleware', () => {
   });
 
   it('calls next() for a normal unrestricted user', async () => {
-    next.mockClear();
     const ctx = createMockContext({ user: mockUser() });
     await middleware(ctx, next);
     expect(next).toHaveBeenCalledOnce();

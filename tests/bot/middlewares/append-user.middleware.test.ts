@@ -20,12 +20,12 @@ function mockUser(overrides: Partial<User> = {}): User {
   } as User;
 }
 
-function createMockUserService(): jest.Mocked<UserService> {
+function createMockUserService(): vi.Mocked<UserService> {
   return {
     findByTelegramId: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
-  } as unknown as jest.Mocked<UserService>;
+  } as unknown as vi.Mocked<UserService>;
 }
 
 describe('AppendUserMiddleware', () => {
