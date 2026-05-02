@@ -95,11 +95,19 @@ The bot follows a modular architecture with clear separation of concerns:
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server with hot reload
-npm run build        # Build the project
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
+npm run dev           # Start development server with hot reload
+npm run build         # Compile TypeScript → dist/
+npm run start         # Start production server
+npm run lint          # Run ESLint
+npm run lint:fix      # Auto-fix ESLint issues
+npm run test          # Run test suite (Vitest)
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+npm run db:setup      # Generate Prisma client + run migrations
+npm run db:migrate    # Create new migration
+npm run db:generate   # Regenerate Prisma client after schema changes
+npm run db:reset      # Reset database and re-run all migrations
+npm run db:push       # Push schema changes without migration
 ```
 
 ## 🤝 Contributing
