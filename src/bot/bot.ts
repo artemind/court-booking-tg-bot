@@ -15,7 +15,7 @@ import { CancelMyBookingHandler } from './handlers/my-bookings/cancel-my-booking
 import { ShowNotificationPreferencesHandler } from './handlers/notification-preferences/show-notification-preferences.handler';
 import { MainMenuHandler } from './handlers/main-menu.handler';
 import { ConfigureNotificationPreferencesHandler } from './handlers/notification-preferences/configure-notification-preferences.handler';
-import { CronHandler } from './handlers/cron.handler';
+import { NotificationScheduler } from './notification-scheduler';
 import { I18n } from '@edjopato/telegraf-i18n';
 import { injectable, Container } from 'inversify';
 import { IHandlerConstructor } from './handlers/handler.interface';
@@ -40,7 +40,6 @@ export class Bot {
     CancelMyBookingHandler,
     ShowNotificationPreferencesHandler,
     ConfigureNotificationPreferencesHandler,
-    CronHandler,
   ];
 
   constructor(private container: Container) {
@@ -52,6 +51,7 @@ export class Bot {
     this.registerMiddlewares();
     await this.registerErrorHandler();
     await this.registerHandlers();
+    this.container.get(NotificationScheduler).start();
     await this.bot.launch();
   }
 
