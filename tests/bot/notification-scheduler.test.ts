@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as nodeCron from 'node-cron';
-import { CronHandler } from '../../../src/bot/handlers/cron.handler';
-import type { Booking, Court, User } from '../../../src/generated/prisma';
+import { NotificationScheduler } from '../../src/bot/notification-scheduler';
+import type { Booking, Court, User } from '../../src/generated/prisma';
 
 vi.mock('node-cron', () => ({
   schedule: vi.fn(),
@@ -39,39 +39,39 @@ const fakeBooking: Booking & { user: User; court: Court } = {
   court: fakeCourt,
 };
 
-function makeHandler() {
+function makeScheduler() {
   const bot = {} as any;
   const bookingService = { getBookingsToBeNotified: vi.fn().mockResolvedValue([fakeBooking]) };
   const sendNotificationAction = { run: vi.fn() };
 
-  const handler = new CronHandler(bot, bookingService as any, sendNotificationAction as any);
+  const scheduler = new NotificationScheduler(bot, bookingService as any, sendNotificationAction as any);
 
-  return { handler, bookingService, sendNotificationAction };
+  return { scheduler, bookingService, sendNotificationAction };
 }
 
-describe('CronHandler', () => {
+describe('NotificationScheduler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (nodeCron.schedule as ReturnType<typeof vi.fn>).mockReturnValue({ stop: vi.fn() });
   });
 
-  it('schedules a cron task with the correct pattern on register', async () => {
-    const { handler } = makeHandler();
-    await handler.register();
+  it('schedules a cron task with the correct pattern on start', () => {
+    const { scheduler } = makeScheduler();
+    scheduler.start();
     expect(nodeCron.schedule).toHaveBeenCalledOnce();
     expect((nodeCron.schedule as ReturnType<typeof vi.fn>).mock.calls[0]![0]).toBe('*/15 * * * *');
   });
 
   describe('scheduled callback', () => {
-    async function runScheduledCallback(handler: CronHandler) {
-      await handler.register();
+    async function runScheduledCallback(scheduler: NotificationScheduler) {
+      scheduler.start();
       const scheduledCb = (nodeCron.schedule as ReturnType<typeof vi.fn>).mock.calls[0]![1] as () => Promise<void>;
       await scheduledCb();
     }
 
     it('calls getBookingsToBeNotified with the correct window params', async () => {
-      const { handler, bookingService } = makeHandler();
-      await runScheduledCallback(handler);
+      const { scheduler, bookingService } = makeScheduler();
+      await runScheduledCallback(scheduler);
       expect(bookingService.getBookingsToBeNotified).toHaveBeenCalledOnce();
       const [, minutesBefore, minutesBeforeEnd] = bookingService.getBookingsToBeNotified.mock.calls[0]!;
       expect(minutesBefore).toBe(30);
@@ -79,16 +79,16 @@ describe('CronHandler', () => {
     });
 
     it('calls sendNotificationAction.run for each booking returned', async () => {
-      const { handler, bookingService, sendNotificationAction } = makeHandler();
+      const { scheduler, bookingService, sendNotificationAction } = makeScheduler();
       bookingService.getBookingsToBeNotified.mockResolvedValue([fakeBooking, fakeBooking]);
-      await runScheduledCallback(handler);
+      await runScheduledCallback(scheduler);
       expect(sendNotificationAction.run).toHaveBeenCalledTimes(2);
     });
 
     it('does not call sendNotificationAction.run when no bookings are returned', async () => {
-      const { handler, bookingService, sendNotificationAction } = makeHandler();
+      const { scheduler, bookingService, sendNotificationAction } = makeScheduler();
       bookingService.getBookingsToBeNotified.mockResolvedValue([]);
-      await runScheduledCallback(handler);
+      await runScheduledCallback(scheduler);
       expect(sendNotificationAction.run).not.toHaveBeenCalled();
     });
   });
