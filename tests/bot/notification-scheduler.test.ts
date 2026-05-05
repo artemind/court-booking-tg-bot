@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as nodeCron from 'node-cron';
 import { NotificationScheduler } from '../../src/bot/notification-scheduler';
+import type { IBookingConfig } from '../../src/config/booking.config';
 import type { Booking, Court, User } from '../../src/generated/prisma';
 
 vi.mock('node-cron', () => ({
@@ -39,12 +40,22 @@ const fakeBooking: Booking & { user: User; court: Court } = {
   court: fakeCourt,
 };
 
+const defaultConfig: IBookingConfig = {
+  availableFromTime: '07:00',
+  availableToTime: '23:59',
+  slotSizeMinutes: 30,
+  minDurationMinutes: 30,
+  maxDurationMinutes: 180,
+  minutesBeforeStartNotification: 30,
+  minutesBeforeEndNotification: 15,
+};
+
 function makeScheduler() {
   const bot = {} as any;
   const bookingService = { getBookingsToBeNotified: vi.fn().mockResolvedValue([fakeBooking]) };
   const sendNotificationAction = { run: vi.fn() };
 
-  const scheduler = new NotificationScheduler(bot, bookingService as any, sendNotificationAction as any);
+  const scheduler = new NotificationScheduler(bot, bookingService as any, sendNotificationAction as any, defaultConfig);
 
   return { scheduler, bookingService, sendNotificationAction };
 }

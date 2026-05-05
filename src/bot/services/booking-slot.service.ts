@@ -2,21 +2,15 @@ import dayjs from 'dayjs';
 import { Booking } from '../../generated/prisma';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
+import { BOOKING_CONFIG_TOKEN } from '../../config/booking.config';
+import type { IBookingConfig } from '../../config/booking.config';
 
 @injectable()
 @provide()
 export class BookingSlotService {
   constructor(
-    @inject('BOOKING_AVAILABLE_FROM_TIME')
-    private bookingAvailableFromTime: string,
-    @inject('BOOKING_AVAILABLE_TO_TIME')
-    private bookingAvailableToTime: string,
-    @inject('BOOKING_SLOT_SIZE_IN_MINUTES')
-    private bookingSlotSizeMins: number,
-    @inject('BOOKING_MIN_DURATION_MINUTES')
-    private bookingMinDurationMinutes: number,
-    @inject('BOOKING_MAX_DURATION_MINUTES')
-    private bookingMaxDurationMinutes: number,
+    @inject(BOOKING_CONFIG_TOKEN)
+    private config: IBookingConfig,
   ) {
   }
 
@@ -34,24 +28,24 @@ export class BookingSlotService {
 
   generateTimeSlots(startHour?: string, endHour?: string): string[] {
     const slots: string[] = [];
-    let currentTime = dayjs(`1970-01-01T${startHour || this.bookingAvailableFromTime}`);
-    const endTime = dayjs(`1970-01-01T${endHour || this.bookingAvailableToTime}`);
+    let currentTime = dayjs(`1970-01-01T${startHour || this.config.availableFromTime}`);
+    const endTime = dayjs(`1970-01-01T${endHour || this.config.availableToTime}`);
 
     while (currentTime <= endTime) {
       slots.push(currentTime.format('HH:mm'));
 
-      currentTime = currentTime.add(this.bookingSlotSizeMins, 'minute');
+      currentTime = currentTime.add(this.config.slotSizeMinutes, 'minute');
     }
 
     return slots;
   }
 
   generateAvailableTimeSlots(date: dayjs.Dayjs, bookings: Booking[]): string[] {
-    let startTime = this.bookingAvailableFromTime;
+    let startTime = this.config.availableFromTime;
     if (date.startOf('day').utc().isSame(dayjs().startOf('day').utc(), 'day')) {
       const now = dayjs().tz();
       const totalMinutes = now.hour() * 60 + now.minute();
-      const nextSlotTotal = Math.floor(totalMinutes / this.bookingSlotSizeMins) * this.bookingSlotSizeMins + this.bookingSlotSizeMins;
+      const nextSlotTotal = Math.floor(totalMinutes / this.config.slotSizeMinutes) * this.config.slotSizeMinutes + this.config.slotSizeMinutes;
       if (nextSlotTotal >= 24 * 60) {
         return [];
       }
@@ -59,7 +53,7 @@ export class BookingSlotService {
       const m = nextSlotTotal % 60;
       startTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
-    const allSlots: string[] = this.generateTimeSlots(startTime, this.bookingAvailableToTime);
+    const allSlots: string[] = this.generateTimeSlots(startTime, this.config.availableToTime);
     const bookedSlots: string[] = this.getBookedTimeSlots(bookings);
 
     return allSlots.filter(slot => !bookedSlots.includes(slot));
@@ -75,12 +69,12 @@ export class BookingSlotService {
   }
 
   generateDurations(min?: number, max?: number): number[] {
-    min ||= this.bookingMinDurationMinutes;
-    max ||= this.bookingMaxDurationMinutes;
+    min ||= this.config.minDurationMinutes;
+    max ||= this.config.maxDurationMinutes;
     const result = [];
     while (min <= max) {
       result.push(min);
-      min += this.bookingSlotSizeMins;
+      min += this.config.slotSizeMinutes;
     }
 
     return result;
@@ -89,11 +83,11 @@ export class BookingSlotService {
   generateAvailableDurations(startTime: dayjs.Dayjs, bookings: Booking[]): number[] {
     startTime = startTime.utc();
     const now = dayjs.utc();
-    if (startTime.isSame(now, 'day') && now.subtract(this.bookingSlotSizeMins, 'minute').isAfter(startTime)) {
+    if (startTime.isSame(now, 'day') && now.subtract(this.config.slotSizeMinutes, 'minute').isAfter(startTime)) {
       return [];
     }
     const allDurations = this.generateDurations();
-    const bookingEndOfDay = dayjs.tz(`${startTime.tz().format('YYYY-MM-DD')}T${this.bookingAvailableToTime}`).utc();
+    const bookingEndOfDay = dayjs.tz(`${startTime.tz().format('YYYY-MM-DD')}T${this.config.availableToTime}`).utc();
     return allDurations.filter(duration => {
       const endTime = startTime.add(duration, 'minute');
       if (endTime.subtract(1, 'minute').isAfter(bookingEndOfDay)) {
