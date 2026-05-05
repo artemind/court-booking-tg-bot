@@ -7,10 +7,7 @@ function makeHandler() {
   const bot = { hears: vi.fn((pattern, cb) => hearsHandlers.push({ pattern, cb })) };
 
   const updateNotificationPreferencesAction = {
-    disableNotificationBeforeBookingStarts: vi.fn().mockResolvedValue(true),
-    enableNotificationBeforeBookingStarts: vi.fn().mockResolvedValue(true),
-    disableNotificationBeforeBookingEnds: vi.fn().mockResolvedValue(true),
-    enableNotificationBeforeBookingEnds: vi.fn().mockResolvedValue(true),
+    run: vi.fn().mockResolvedValue(true),
   };
 
   const handler = new ConfigureNotificationPreferencesHandler(bot as any, updateNotificationPreferencesAction as any);
@@ -28,51 +25,18 @@ describe('ConfigureNotificationPreferencesHandler', () => {
     expect(bot.hears).toHaveBeenCalledTimes(4);
   });
 
-  describe('notify_before_booking_starts_enabled handler', () => {
-    it('calls disableNotificationBeforeBookingStarts', async () => {
-      const { handler, updateNotificationPreferencesAction, getCb } = makeHandler();
-      await handler.register();
-      const ctx = createMockContext();
+  it.each([
+    [0, 'notifyBeforeBookingStarts', false],
+    [1, 'notifyBeforeBookingStarts', true],
+    [2, 'notifyBeforeBookingEnds',   false],
+    [3, 'notifyBeforeBookingEnds',   true],
+  ] as const)('handler[%i] calls run with field=%s value=%s', async (index, field, value) => {
+    const { handler, updateNotificationPreferencesAction, getCb } = makeHandler();
+    await handler.register();
+    const ctx = createMockContext();
 
-      await getCb(0)(ctx);
+    await getCb(index)(ctx);
 
-      expect(updateNotificationPreferencesAction.disableNotificationBeforeBookingStarts).toHaveBeenCalledWith(ctx);
-    });
-  });
-
-  describe('notify_before_booking_starts_disabled handler', () => {
-    it('calls enableNotificationBeforeBookingStarts', async () => {
-      const { handler, updateNotificationPreferencesAction, getCb } = makeHandler();
-      await handler.register();
-      const ctx = createMockContext();
-
-      await getCb(1)(ctx);
-
-      expect(updateNotificationPreferencesAction.enableNotificationBeforeBookingStarts).toHaveBeenCalledWith(ctx);
-    });
-  });
-
-  describe('notify_before_booking_ends_enabled handler', () => {
-    it('calls disableNotificationBeforeBookingEnds', async () => {
-      const { handler, updateNotificationPreferencesAction, getCb } = makeHandler();
-      await handler.register();
-      const ctx = createMockContext();
-
-      await getCb(2)(ctx);
-
-      expect(updateNotificationPreferencesAction.disableNotificationBeforeBookingEnds).toHaveBeenCalledWith(ctx);
-    });
-  });
-
-  describe('notify_before_booking_ends_disabled handler', () => {
-    it('calls enableNotificationBeforeBookingEnds', async () => {
-      const { handler, updateNotificationPreferencesAction, getCb } = makeHandler();
-      await handler.register();
-      const ctx = createMockContext();
-
-      await getCb(3)(ctx);
-
-      expect(updateNotificationPreferencesAction.enableNotificationBeforeBookingEnds).toHaveBeenCalledWith(ctx);
-    });
+    expect(updateNotificationPreferencesAction.run).toHaveBeenCalledWith(ctx, field, value);
   });
 });

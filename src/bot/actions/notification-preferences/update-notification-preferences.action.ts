@@ -7,6 +7,8 @@ import {
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 
+type NotificationPreferenceField = 'notifyBeforeBookingStarts' | 'notifyBeforeBookingEnds';
+
 @injectable()
 @provide()
 export class UpdateNotificationPreferencesAction {
@@ -15,35 +17,8 @@ export class UpdateNotificationPreferencesAction {
     private userService: UserService
   ) {}
 
-  async enableNotificationBeforeBookingStarts(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.update(ctx.user!.id, {
-      notifyBeforeBookingStarts: true,
-    });
-
-    return NotificationPreferencesUpdatedMessage.reply(ctx, user);
-  }
-
-  async disableNotificationBeforeBookingStarts(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.update(ctx.user!.id, {
-      notifyBeforeBookingStarts: false,
-    });
-
-    return NotificationPreferencesUpdatedMessage.reply(ctx, user);
-  }
-
-  async enableNotificationBeforeBookingEnds(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.update(ctx.user!.id, {
-      notifyBeforeBookingEnds: true,
-    });
-
-    return NotificationPreferencesUpdatedMessage.reply(ctx, user);
-  }
-
-  async disableNotificationBeforeBookingEnds(ctx: Context): Promise<Message.TextMessage> {
-    const user = await this.userService.update(ctx.user!.id, {
-      notifyBeforeBookingEnds: false,
-    });
-
+  async run(ctx: Context, field: NotificationPreferenceField, value: boolean): Promise<Message.TextMessage> {
+    const user = await this.userService.update(ctx.user!.id, { [field]: value });
     return NotificationPreferencesUpdatedMessage.reply(ctx, user);
   }
 }
