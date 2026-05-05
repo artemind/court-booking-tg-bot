@@ -153,18 +153,15 @@ describe('CreateBookingAction', () => {
       );
     });
 
-    it('shows error and redirects when slot is concurrently taken', async () => {
-      const { action, bookingService, showChooseCourtAction } = makeAction();
+    it('propagates SlotConflictException for global handler to catch', async () => {
+      const { action, bookingService } = makeAction();
       bookingService.createIfAvailable.mockRejectedValue(new SlotConflictException());
       const ctx = ctxWithDuration();
 
-      await action.run(ctx, SELECTED_DURATION);
-
-      expect(ctx.reply).toHaveBeenCalledWith('errors.cannot_create_booking_with_selected_parameters');
-      expect(showChooseCourtAction.run).toHaveBeenCalledWith(ctx, true);
+      await expect(action.run(ctx, SELECTED_DURATION)).rejects.toBeInstanceOf(SlotConflictException);
     });
 
-    it('rethrows unexpected errors', async () => {
+    it('propagates unexpected errors', async () => {
       const { action, bookingService } = makeAction();
       const unexpected = new Error('db connection lost');
       bookingService.createIfAvailable.mockRejectedValue(unexpected);

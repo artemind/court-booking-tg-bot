@@ -3,7 +3,6 @@ import type { Message } from 'telegraf/types';
 import { BookingService } from '../../services/booking.service';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
-import { SlotConflictException } from '../../exceptions/slot-conflict.exception';
 import { ShowChooseCourtAction } from './show-choose-court.action';
 import { Booking } from '../../../generated/prisma';
 import { inject, injectable } from 'inversify';
@@ -47,20 +46,12 @@ export class CreateBookingAction {
     }
 
     ctx.session.bookingData.duration = selectedDuration;
-    try {
-      await this.bookingService.createIfAvailable(
-        ctx.session.bookingData.courtId,
-        ctx.user!.id,
-        ctx.session.bookingData.dateAndTime.toDate(),
-        ctx.session.bookingData.dateAndTime.add(selectedDuration, 'minute').toDate(),
-      );
-    } catch (e) {
-      if (e instanceof SlotConflictException) {
-        await ctx.reply(ctx.i18n.t('errors.cannot_create_booking_with_selected_parameters'));
-        return this.showChooseCourtAction.run(ctx, true);
-      }
-      throw e;
-    }
+    await this.bookingService.createIfAvailable(
+      ctx.session.bookingData.courtId,
+      ctx.user!.id,
+      ctx.session.bookingData.dateAndTime.toDate(),
+      ctx.session.bookingData.dateAndTime.add(selectedDuration, 'minute').toDate(),
+    );
 
     const bookingData = ctx.session.bookingData;
     ctx.session.bookingData = {};

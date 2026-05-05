@@ -24,6 +24,7 @@
   },
   "errors": {
     "cannot_create_booking_with_selected_parameters": "Бронювання за обраними параметрами неможливе. Спробуйте ще раз",
+    "slot_already_booked": "Цей часовий слот вже заброньовано. Будь ласка, оберіть інший час.",
     "selected_time_already_booked": "Обраний час вже заброньовано. Оберіть інший час",
     "booking_not_found": "Помилка. Бронювання не знайдено",
     "not_authorized_to_cancel_booking": "Помилка. Ви не можете відмінити це бронювання."
