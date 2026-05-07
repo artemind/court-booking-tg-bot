@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { CreateBookingAction } from '../../../../src/bot/actions/booking/create-booking.action';
 import { SlotConflictException } from '../../../../src/bot/exceptions/slot-conflict.exception';
 import { createMockContext } from '../../../helpers/create-mock-context';
 import type { User } from '../../../../src/generated/prisma';
 
-const FUTURE_DATE_AND_TIME = dayjs.utc('2026-05-15T10:00:00Z');
-const PAST_DATE_AND_TIME = dayjs.utc('2020-01-01T10:00:00Z');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('UTC');
+
+const FUTURE_DATE = dayjs.utc('2026-05-15').startOf('day');
+const FUTURE_TIME = '10:00';
+const PAST_DATE = dayjs.utc('2020-01-01').startOf('day');
 const SELECTED_DURATION = 60;
 
 const fakeUser: User = {
@@ -41,14 +48,15 @@ function makeAction() {
   return { action, bookingService, bookingSlotService, showChooseCourtAction };
 }
 
-function ctxWithDuration(overrides?: { dateAndTime?: dayjs.Dayjs; courtId?: number }) {
+function ctxWithDuration(overrides?: { date?: dayjs.Dayjs; time?: string; courtId?: number }) {
   return createMockContext({
     user: fakeUser,
     session: {
       sessionStartsAt: new Date(),
       bookingData: {
         courtId: overrides?.courtId ?? 1,
-        dateAndTime: overrides?.dateAndTime ?? FUTURE_DATE_AND_TIME,
+        date: overrides?.date ?? FUTURE_DATE,
+        time: overrides?.time ?? FUTURE_TIME,
       },
     },
   });
@@ -62,7 +70,7 @@ describe('CreateBookingAction', () => {
       const { action, showChooseCourtAction } = makeAction();
       const ctx = createMockContext({
         user: fakeUser,
-        session: { sessionStartsAt: new Date(), bookingData: { dateAndTime: FUTURE_DATE_AND_TIME } },
+        session: { sessionStartsAt: new Date(), bookingData: { date: FUTURE_DATE, time: FUTURE_TIME } },
       });
 
       await action.run(ctx, SELECTED_DURATION);
@@ -71,7 +79,7 @@ describe('CreateBookingAction', () => {
       expect(showChooseCourtAction.run).toHaveBeenCalledWith(ctx, true);
     });
 
-    it('replies with error and redirects when dateAndTime is missing', async () => {
+    it('replies with error and redirects when time is missing', async () => {
       const { action, showChooseCourtAction } = makeAction();
       const ctx = createMockContext({
         user: fakeUser,
@@ -99,7 +107,7 @@ describe('CreateBookingAction', () => {
   describe('duration validation', () => {
     it('replies with error and redirects when dateAndTime is in the past', async () => {
       const { action, showChooseCourtAction } = makeAction();
-      const ctx = ctxWithDuration({ dateAndTime: PAST_DATE_AND_TIME });
+      const ctx = ctxWithDuration({ date: PAST_DATE });
 
       await action.run(ctx, SELECTED_DURATION);
 
@@ -130,7 +138,7 @@ describe('CreateBookingAction', () => {
 
     it('does not create booking when duration is invalid', async () => {
       const { action, bookingService } = makeAction();
-      const ctx = ctxWithDuration({ dateAndTime: PAST_DATE_AND_TIME });
+      const ctx = ctxWithDuration({ date: PAST_DATE });
 
       await action.run(ctx, SELECTED_DURATION);
 
@@ -142,14 +150,16 @@ describe('CreateBookingAction', () => {
     it('creates booking with correct arguments', async () => {
       const { action, bookingService } = makeAction();
       const ctx = ctxWithDuration();
+      const expectedStart = dayjs.utc('2026-05-15T10:00:00Z').toDate();
+      const expectedEnd = dayjs.utc('2026-05-15T11:00:00Z').toDate();
 
       await action.run(ctx, SELECTED_DURATION);
 
       expect(bookingService.createIfAvailable).toHaveBeenCalledWith(
         1,
         fakeUser.id,
-        FUTURE_DATE_AND_TIME.toDate(),
-        FUTURE_DATE_AND_TIME.add(SELECTED_DURATION, 'minute').toDate(),
+        expectedStart,
+        expectedEnd,
       );
     });
 

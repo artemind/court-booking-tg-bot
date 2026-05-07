@@ -1,8 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { BookingSummaryFormatter } from '../../../src/bot/formatters/booking-summary.formatter';
 import type { BookingData } from '../../../src/bot/context';
 import type { I18nContext } from '@edjopato/telegraf-i18n';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('UTC');
 
 function makeI18n(): I18nContext {
   return { t: vi.fn((key: string) => key), locale: vi.fn().mockReturnValue('en') } as unknown as I18nContext;
@@ -41,9 +47,10 @@ describe('BookingSummaryFormatter', () => {
     expect(result).toContain('10:30');
   });
 
-  it('includes end time when dateAndTime and duration are both set', () => {
+  it('includes end time when date, time and duration are all set', () => {
     const data: BookingData = {
-      dateAndTime: dayjs.utc('2026-05-15T10:00:00Z'),
+      date: dayjs.utc('2026-05-15'),
+      time: '10:00',
       duration: 90,
     };
     const result = BookingSummaryFormatter.format(makeI18n(), data);
@@ -52,7 +59,7 @@ describe('BookingSummaryFormatter', () => {
   });
 
   it('does not include end time when duration is missing', () => {
-    const data: BookingData = { dateAndTime: dayjs.utc('2026-05-15T10:00:00Z') };
+    const data: BookingData = { date: dayjs.utc('2026-05-15'), time: '10:00' };
     const result = BookingSummaryFormatter.format(makeI18n(), data);
     expect(result).not.toContain('end_time');
   });
@@ -68,7 +75,6 @@ describe('BookingSummaryFormatter', () => {
       courtName: 'Court A',
       date: dayjs.utc('2026-05-15'),
       time: '10:00',
-      dateAndTime: dayjs.utc('2026-05-15T10:00:00Z'),
       duration: 60,
     };
     const result = BookingSummaryFormatter.format(makeI18n(), data);

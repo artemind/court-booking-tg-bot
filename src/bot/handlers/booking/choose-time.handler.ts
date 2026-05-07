@@ -3,7 +3,6 @@ import { Context } from '../../context';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { Booking } from '../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
-import dayjs from 'dayjs';
 import { ShowChooseCourtAction } from '../../actions/booking/show-choose-court.action';
 import type { Message } from 'telegraf/types';
 import { ShowChooseTimeAction } from '../../actions/booking/show-choose-time.action';
@@ -56,7 +55,6 @@ export class ChooseTimeHandler implements IHandler {
         return this.showChooseTimeAction.run(ctx, true);
       }
       ctx.session.bookingData.time = selectedTime;
-      ctx.session.bookingData.dateAndTime = dayjs.tz(ctx.session.bookingData.date.format('YYYY-MM-DD') + 'T' + ctx.session.bookingData.time).startOf('minute').utc();
 
       return this.showChooseDurationAction.run(ctx, false);
     });

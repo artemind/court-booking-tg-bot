@@ -4,6 +4,7 @@ import { BookingService } from '../../services/booking.service';
 import { BookingSlotService } from '../../services/booking-slot.service';
 import { BookingSummaryFormatter } from '../../formatters/booking-summary.formatter';
 import { ShowChooseCourtAction } from './show-choose-court.action';
+import { ContextManager } from '../../context.manager';
 import { Booking } from '../../../generated/prisma';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
@@ -22,22 +23,24 @@ export class CreateBookingAction {
   ) {}
 
   async run(ctx: Context, selectedDuration: number | null): Promise<true | Message.TextMessage> {
-    if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.dateAndTime) {
+    if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.date || !ctx.session.bookingData?.time) {
       await ctx.reply(ctx.i18n.t('exceptions.an_error_occurred'));
       return this.showChooseCourtAction.run(ctx, true);
     }
 
+    const dateAndTime = ContextManager.getDateAndTime(ctx)!;
+
     const bookings: Booking[] = await this.bookingService.getByDate(
       ctx.session.bookingData.courtId,
-      ctx.session.bookingData.dateAndTime,
+      dateAndTime,
     );
     const availableDurations = this.bookingSlotService.generateAvailableDurations(
-      ctx.session.bookingData.dateAndTime,
+      dateAndTime,
       bookings,
     );
 
     if (
-      ctx.session.bookingData.dateAndTime.isBefore(dayjs(), 'day') ||
+      dateAndTime.isBefore(dayjs(), 'day') ||
       selectedDuration === null ||
       !availableDurations.includes(selectedDuration)
     ) {
@@ -49,8 +52,8 @@ export class CreateBookingAction {
     await this.bookingService.createIfAvailable(
       ctx.session.bookingData.courtId,
       ctx.user!.id,
-      ctx.session.bookingData.dateAndTime.toDate(),
-      ctx.session.bookingData.dateAndTime.add(selectedDuration, 'minute').toDate(),
+      dateAndTime.toDate(),
+      dateAndTime.add(selectedDuration, 'minute').toDate(),
     );
 
     const bookingData = ctx.session.bookingData;

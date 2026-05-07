@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { BookingData, Context } from './context';
 
 export class ContextManager {
@@ -21,6 +22,12 @@ export class ContextManager {
   }
 
   static clearTimeSelection(ctx: Context): void {
-    this.clearBookingFields(ctx, ['time', 'dateAndTime']);
+    this.clearBookingFields(ctx, ['time']);
+  }
+
+  static getDateAndTime(ctx: Context): dayjs.Dayjs | undefined {
+    const { date, time } = ctx.session.bookingData ?? {};
+    if (!date || !time) return undefined;
+    return dayjs.tz(`${date.format('YYYY-MM-DD')}T${time}`).startOf('minute').utc();
   }
 }

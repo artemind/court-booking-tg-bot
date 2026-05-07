@@ -132,17 +132,6 @@ describe('ChooseTimeHandler', () => {
       expect(ctx.session.bookingData!.time).toBe(SELECTED_TIME);
     });
 
-    it('sets bookingData.dateAndTime to a UTC dayjs combining date and time', async () => {
-      const { handler, selectCb } = makeHandler();
-      await handler.register();
-      const ctx = ctxWithTime(SELECTED_TIME);
-
-      await selectCb()(ctx);
-
-      const dt = ctx.session.bookingData!.dateAndTime!;
-      expect(dt.format('YYYY-MM-DD HH:mm')).toBe('2026-05-15 10:30');
-    });
-
     it('calls showChooseDurationAction.run(ctx, false) after valid time', async () => {
       const { handler, showChooseDurationAction, selectCb } = makeHandler();
       await handler.register();

@@ -4,7 +4,8 @@ import { ChooseDurationHandler } from '../../../../src/bot/handlers/booking/choo
 import { ContextManager } from '../../../../src/bot/context.manager';
 import { createMockContext } from '../../../helpers/create-mock-context';
 
-const FUTURE_DATE_AND_TIME = dayjs.utc('2026-05-15T10:00:00Z');
+const FUTURE_DATE = dayjs.utc('2026-05-15').startOf('day');
+const FUTURE_TIME = '10:00';
 const SELECTED_DURATION = 60;
 
 function makeHandler() {
@@ -60,7 +61,7 @@ describe('ChooseDurationHandler', () => {
         match: ['', `${SELECTED_DURATION}`] as unknown as RegExpExecArray,
         session: {
           sessionStartsAt: new Date(),
-          bookingData: { courtId: 1, dateAndTime: FUTURE_DATE_AND_TIME },
+          bookingData: { courtId: 1, date: FUTURE_DATE, time: FUTURE_TIME },
         },
       });
 
@@ -76,7 +77,7 @@ describe('ChooseDurationHandler', () => {
         match: [''] as unknown as RegExpExecArray,
         session: {
           sessionStartsAt: new Date(),
-          bookingData: { courtId: 1, dateAndTime: FUTURE_DATE_AND_TIME },
+          bookingData: { courtId: 1, date: FUTURE_DATE, time: FUTURE_TIME },
         },
       });
 

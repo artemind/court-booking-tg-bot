@@ -19,6 +19,5 @@ export interface BookingData {
   courtName?: string;
   date?: dayjs.Dayjs;
   time?: string;
-  dateAndTime?: dayjs.Dayjs;
   duration?: number;
 }
