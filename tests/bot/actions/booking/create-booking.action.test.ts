@@ -11,7 +11,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('UTC');
 
-const FUTURE_DATE = dayjs.utc('2026-05-15').startOf('day');
+const FUTURE_DATE = dayjs.utc().add(1, 'year').startOf('day');
 const FUTURE_TIME = '10:00';
 const PAST_DATE = dayjs.utc('2020-01-01').startOf('day');
 const SELECTED_DURATION = 60;
@@ -150,8 +150,8 @@ describe('CreateBookingAction', () => {
     it('creates booking with correct arguments', async () => {
       const { action, bookingService } = makeAction();
       const ctx = ctxWithDuration();
-      const expectedStart = dayjs.utc('2026-05-15T10:00:00Z').toDate();
-      const expectedEnd = dayjs.utc('2026-05-15T11:00:00Z').toDate();
+      const expectedStart = FUTURE_DATE.hour(10).toDate();
+      const expectedEnd = FUTURE_DATE.hour(10).add(SELECTED_DURATION, 'minute').toDate();
 
       await action.run(ctx, SELECTED_DURATION);
 
