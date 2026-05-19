@@ -20,22 +20,7 @@ export class AppendUserMiddleware {
         throw new UserNotFoundException(ctx.i18n);
       }
 
-      let user = await this.userService.findByTelegramId(telegramId);
-      if (!user) {
-        user = await this.userService.create({
-          name,
-          telegramId,
-          telegramUsername,
-          languageCode
-        });
-      } else if (user.telegramUsername !== telegramUsername || user.name !== name || user.languageCode !== languageCode) {
-        user = await this.userService.update(user.id, {
-          name,
-          telegramUsername,
-          languageCode
-        });
-      }
-      ctx.user = user;
+      ctx.user = await this.userService.upsert({ name, telegramId, telegramUsername, languageCode });
 
       return next();
     };
