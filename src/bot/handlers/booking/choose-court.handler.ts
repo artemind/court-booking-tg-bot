@@ -7,6 +7,7 @@ import { ShowChooseDateAction } from '../../actions/booking/show-choose-date.act
 import { inject, injectable } from 'inversify';
 import { IHandler } from '../handler.interface';
 import { provide } from '@inversifyjs/binding-decorators';
+import { parseIntSafe } from '../../../utils/parse.utils';
 
 @injectable()
 @provide()
@@ -23,7 +24,9 @@ export class ChooseCourtHandler implements IHandler {
 
   async register(): Promise<void> {
     this.bot.action(/^BOOKING_CHOOSE_COURT_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
-      const selectedCourt = await this.courtService.findById(parseInt(ctx.match[1] || ''));
+      const courtId = parseIntSafe(ctx.match[1]);
+      if (courtId === null) throw new CourtNotFoundException(ctx.i18n);
+      const selectedCourt = await this.courtService.findById(courtId);
       if (!selectedCourt) {
         throw new CourtNotFoundException(ctx.i18n);
       }

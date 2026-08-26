@@ -31,63 +31,21 @@ describe('UpdateNotificationPreferencesAction', () => {
 
   const ctx = () => createMockContext({ user: fakeUser });
 
-  describe('enableNotificationBeforeBookingStarts', () => {
-    it('calls userService.update with notifyBeforeBookingStarts=true', async () => {
-      const { action, userService } = makeAction();
-      await action.enableNotificationBeforeBookingStarts(ctx());
-      expect(userService.update).toHaveBeenCalledWith(fakeUser.id, { notifyBeforeBookingStarts: true });
-    });
-
-    it('calls NotificationPreferencesUpdatedMessage.reply with updated user', async () => {
-      const { action } = makeAction();
-      const c = ctx();
-      await action.enableNotificationBeforeBookingStarts(c);
-      expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
-    });
+  it.each([
+    ['notifyBeforeBookingStarts', true],
+    ['notifyBeforeBookingStarts', false],
+    ['notifyBeforeBookingEnds', true],
+    ['notifyBeforeBookingEnds', false],
+  ] as const)('calls userService.update with %s=%s', async (field, value) => {
+    const { action, userService } = makeAction();
+    await action.run(ctx(), field, value);
+    expect(userService.update).toHaveBeenCalledWith(fakeUser.id, { [field]: value });
   });
 
-  describe('disableNotificationBeforeBookingStarts', () => {
-    it('calls userService.update with notifyBeforeBookingStarts=false', async () => {
-      const { action, userService } = makeAction();
-      await action.disableNotificationBeforeBookingStarts(ctx());
-      expect(userService.update).toHaveBeenCalledWith(fakeUser.id, { notifyBeforeBookingStarts: false });
-    });
-
-    it('calls NotificationPreferencesUpdatedMessage.reply with updated user', async () => {
-      const { action } = makeAction();
-      const c = ctx();
-      await action.disableNotificationBeforeBookingStarts(c);
-      expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
-    });
-  });
-
-  describe('enableNotificationBeforeBookingEnds', () => {
-    it('calls userService.update with notifyBeforeBookingEnds=true', async () => {
-      const { action, userService } = makeAction();
-      await action.enableNotificationBeforeBookingEnds(ctx());
-      expect(userService.update).toHaveBeenCalledWith(fakeUser.id, { notifyBeforeBookingEnds: true });
-    });
-
-    it('calls NotificationPreferencesUpdatedMessage.reply with updated user', async () => {
-      const { action } = makeAction();
-      const c = ctx();
-      await action.enableNotificationBeforeBookingEnds(c);
-      expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
-    });
-  });
-
-  describe('disableNotificationBeforeBookingEnds', () => {
-    it('calls userService.update with notifyBeforeBookingEnds=false', async () => {
-      const { action, userService } = makeAction();
-      await action.disableNotificationBeforeBookingEnds(ctx());
-      expect(userService.update).toHaveBeenCalledWith(fakeUser.id, { notifyBeforeBookingEnds: false });
-    });
-
-    it('calls NotificationPreferencesUpdatedMessage.reply with updated user', async () => {
-      const { action } = makeAction();
-      const c = ctx();
-      await action.disableNotificationBeforeBookingEnds(c);
-      expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
-    });
+  it('calls NotificationPreferencesUpdatedMessage.reply with updated user', async () => {
+    const { action } = makeAction();
+    const c = ctx();
+    await action.run(c, 'notifyBeforeBookingStarts', true);
+    expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
   });
 });

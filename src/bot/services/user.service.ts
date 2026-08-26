@@ -24,4 +24,28 @@ export class UserService {
       data,
     });
   }
+
+  async upsert(data: {
+    telegramId: number;
+    name: string;
+    telegramUsername: string;
+    languageCode: string | null;
+  }): Promise<User> {
+    const existing = await this.findByTelegramId(data.telegramId);
+    if (!existing) {
+      return this.create(data);
+    }
+    const isDirty =
+      existing.telegramUsername !== data.telegramUsername ||
+      existing.name !== data.name ||
+      existing.languageCode !== data.languageCode;
+    if (isDirty) {
+      return this.update(existing.id, {
+        name: data.name,
+        telegramUsername: data.telegramUsername,
+        languageCode: data.languageCode,
+      });
+    }
+    return existing;
+  }
 }

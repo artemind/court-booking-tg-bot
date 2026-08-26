@@ -86,17 +86,16 @@ describe('ChooseCourtHandler', () => {
       expect(showChooseDateAction.run).toHaveBeenCalledWith(ctx, false);
     });
 
-    it('calls courtService.findById with NaN when match[1] is undefined', async () => {
+    it('throws CourtNotFoundException without calling findById when match[1] is undefined', async () => {
       const { handler, courtService, getAction } = makeHandler();
       await handler.register();
-      courtService.findById.mockResolvedValue(null);
 
       const ctx = createMockContext({
         match: [''] as unknown as RegExpExecArray,
         session: { sessionStartsAt: new Date(), bookingData: {} },
       });
       await expect(getAction()(ctx)).rejects.toBeInstanceOf(CourtNotFoundException);
-      expect(courtService.findById).toHaveBeenCalledWith(NaN);
+      expect(courtService.findById).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,8 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { ContextManager } from '../../src/bot/context.manager';
 import { createMockContext } from '../helpers/create-mock-context';
 import type { Context } from '../../src/bot/context';
-import dayjs from 'dayjs';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 describe('ContextManager', () => {
   let ctx: Context;
@@ -16,7 +21,6 @@ describe('ContextManager', () => {
           courtName: 'Court A',
           date: dayjs('2024-06-01'),
           time: '10:00',
-          dateAndTime: dayjs('2024-06-01T10:00:00Z'),
           duration: 60,
         },
       },
@@ -37,10 +41,9 @@ describe('ContextManager', () => {
   });
 
   describe('clearTimeSelection', () => {
-    it('removes time and dateAndTime', () => {
+    it('removes time', () => {
       ContextManager.clearTimeSelection(ctx);
       expect(ctx.session.bookingData).not.toHaveProperty('time');
-      expect(ctx.session.bookingData).not.toHaveProperty('dateAndTime');
     });
 
     it('preserves date and other booking fields', () => {
@@ -53,11 +56,10 @@ describe('ContextManager', () => {
   });
 
   describe('clearDateSelection', () => {
-    it('removes date, time, and dateAndTime', () => {
+    it('removes date and time', () => {
       ContextManager.clearDateSelection(ctx);
       expect(ctx.session.bookingData).not.toHaveProperty('date');
       expect(ctx.session.bookingData).not.toHaveProperty('time');
-      expect(ctx.session.bookingData).not.toHaveProperty('dateAndTime');
     });
 
     it('preserves courtId and courtName', () => {
@@ -69,6 +71,30 @@ describe('ContextManager', () => {
     it('does nothing when bookingData is undefined', () => {
       ctx.session.bookingData = undefined;
       expect(() => ContextManager.clearDateSelection(ctx)).not.toThrow();
+    });
+  });
+
+  describe('getDateAndTime', () => {
+    it('returns undefined when date is missing', () => {
+      ctx.session.bookingData = { time: '10:00' };
+      expect(ContextManager.getDateAndTime(ctx)).toBeUndefined();
+    });
+
+    it('returns undefined when time is missing', () => {
+      ctx.session.bookingData = { date: dayjs.utc('2024-06-01') };
+      expect(ContextManager.getDateAndTime(ctx)).toBeUndefined();
+    });
+
+    it('returns undefined when bookingData is undefined', () => {
+      ctx.session.bookingData = undefined;
+      expect(ContextManager.getDateAndTime(ctx)).toBeUndefined();
+    });
+
+    it('computes UTC datetime from date and time', () => {
+      dayjs.tz.setDefault('UTC');
+      ctx.session.bookingData = { date: dayjs.utc('2024-06-01'), time: '10:30' };
+      const result = ContextManager.getDateAndTime(ctx)!;
+      expect(result.toISOString()).toBe('2024-06-01T10:30:00.000Z');
     });
   });
 });

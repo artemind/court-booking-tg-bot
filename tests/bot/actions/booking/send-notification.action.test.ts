@@ -107,13 +107,13 @@ describe('SendNotificationAction', () => {
   });
 
   describe('no notification needed', () => {
-    it('returns undefined when neither condition matches', async () => {
+    it('returns undefined when booking has already ended', async () => {
       const { action } = makeAction();
       const bot = makeBot();
       const booking = {
         ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(60, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(120, 'minutes').toISOString()),
+        dateFrom: new Date(dayjs.utc(FIXED_NOW).subtract(60, 'minutes').toISOString()),
+        dateTill: new Date(dayjs.utc(FIXED_NOW).subtract(30, 'minutes').toISOString()),
       };
 
       const result = await action.run(bot, booking);
@@ -167,7 +167,7 @@ describe('SendNotificationAction', () => {
       await action.run(bot, booking);
 
       const [telegramId] = bot.telegram.sendMessage.mock.calls[0]!;
-      expect(telegramId).toBe(999888);
+      expect(telegramId).toBe('999888');
     });
   });
 });

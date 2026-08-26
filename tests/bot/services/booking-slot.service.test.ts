@@ -3,13 +3,24 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { BookingSlotService } from '../../../src/bot/services/booking-slot.service';
+import type { IBookingConfig } from '../../../src/config/booking.config';
 import type { Booking } from '../../../src/generated/prisma';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const defaultConfig: IBookingConfig = {
+  availableFromTime: '07:00',
+  availableToTime: '23:59',
+  slotSizeMinutes: 30,
+  minDurationMinutes: 30,
+  maxDurationMinutes: 180,
+  minutesBeforeStartNotification: 30,
+  minutesBeforeEndNotification: 15,
+};
+
 // Default service config mirroring production defaults
-const service = new BookingSlotService('07:00', '23:59', 30, 30, 180);
+const service = new BookingSlotService(defaultConfig);
 
 function makeBooking(fromISO: string, tillISO: string): Booking {
   return { dateFrom: new Date(fromISO), dateTill: new Date(tillISO) } as Booking;
@@ -34,7 +45,7 @@ describe('generateTimeSlots', () => {
   });
 
   it('steps by 1 hour when slotSize is 60', () => {
-    const hourly = new BookingSlotService('07:00', '09:00', 60, 60, 180);
+    const hourly = new BookingSlotService({ ...defaultConfig, availableFromTime: '07:00', availableToTime: '09:00', slotSizeMinutes: 60, minDurationMinutes: 60 });
     expect(hourly.generateTimeSlots()).toEqual(['07:00', '08:00', '09:00']);
   });
 });

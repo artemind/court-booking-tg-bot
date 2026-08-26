@@ -110,4 +110,79 @@ describe('UserService', () => {
       expect(result).toBe(updated);
     });
   });
+
+  describe('upsert', () => {
+    const upsertData = {
+      telegramId: 123456,
+      name: 'Test User',
+      telegramUsername: 'testuser',
+      languageCode: 'en',
+    };
+
+    it('creates a new user when none exists', async () => {
+      const { service, prisma } = makeService();
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue(fakeUser);
+
+      await service.upsert(upsertData);
+
+      expect(prisma.user.create).toHaveBeenCalled();
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('returns the created user', async () => {
+      const { service, prisma } = makeService();
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue(fakeUser);
+
+      const result = await service.upsert(upsertData);
+      expect(result).toBe(fakeUser);
+    });
+
+    it('returns existing user without calling update when no fields changed', async () => {
+      const { service, prisma } = makeService();
+      prisma.user.findUnique.mockResolvedValue(fakeUser);
+
+      const result = await service.upsert(upsertData);
+
+      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(result).toBe(fakeUser);
+    });
+
+    it('updates when name changed', async () => {
+      const { service, prisma } = makeService();
+      const existing = { ...fakeUser, name: 'Old Name' } as User;
+      prisma.user.findUnique.mockResolvedValue(existing);
+      prisma.user.update.mockResolvedValue(fakeUser);
+
+      await service.upsert(upsertData);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: existing.id },
+        data: { name: 'Test User', telegramUsername: 'testuser', languageCode: 'en' },
+      });
+    });
+
+    it('updates when telegramUsername changed', async () => {
+      const { service, prisma } = makeService();
+      const existing = { ...fakeUser, telegramUsername: 'oldusername' } as User;
+      prisma.user.findUnique.mockResolvedValue(existing);
+      prisma.user.update.mockResolvedValue(fakeUser);
+
+      await service.upsert(upsertData);
+
+      expect(prisma.user.update).toHaveBeenCalled();
+    });
+
+    it('updates when languageCode changed', async () => {
+      const { service, prisma } = makeService();
+      const existing = { ...fakeUser, languageCode: 'uk' } as User;
+      prisma.user.findUnique.mockResolvedValue(existing);
+      prisma.user.update.mockResolvedValue(fakeUser);
+
+      await service.upsert(upsertData);
+
+      expect(prisma.user.update).toHaveBeenCalled();
+    });
+  });
 });

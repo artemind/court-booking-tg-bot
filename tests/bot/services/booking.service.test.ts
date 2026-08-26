@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import dayjs from 'dayjs';
 import { BookingService } from '../../../src/bot/services/booking.service';
+import { SlotConflictException } from '../../../src/bot/exceptions/slot-conflict.exception';
 import { createMockPrisma } from '../../helpers/create-mock-prisma';
 import type { PrismaClient } from '../../../src/generated/prisma';
 
@@ -96,7 +97,7 @@ describe('getByDate', () => {
     const { gte, lte } = call.where.dateFrom;
 
     expect(gte).toEqual(date.startOf('day').utc().toDate());
-    expect(lte).toEqual(date.endOf('day').toDate());
+    expect(lte).toEqual(date.endOf('day').utc().toDate());
   });
 
   it('returns whatever Prisma returns', async () => {
@@ -106,6 +107,67 @@ describe('getByDate', () => {
 
     const result = await service.getByDate(1, dayjs.utc('2024-06-01'));
     expect(result).toBe(fakeBookings);
+  });
+});
+
+// ─────────────────────────────────────────────
+// createIfAvailable
+// ─────────────────────────────────────────────
+describe('createIfAvailable', () => {
+  const dateFrom = new Date('2024-06-01T10:00:00Z');
+  const dateTill = new Date('2024-06-01T11:00:00Z');
+
+  function withTransaction(prisma: ReturnType<typeof createMockPrisma>) {
+    prisma.$transaction.mockImplementation(async (cb: any) => cb(prisma));
+  }
+
+  it('creates booking when no overlapping bookings exist', async () => {
+    const { service, prisma } = makeService();
+    withTransaction(prisma);
+    prisma.booking.count.mockResolvedValue(0);
+    const created = { id: 10 } as any;
+    prisma.booking.create.mockResolvedValue(created);
+
+    const result = await service.createIfAvailable(1, 2, dateFrom, dateTill);
+
+    expect(result).toBe(created);
+    expect(prisma.booking.create).toHaveBeenCalledWith({
+      data: {
+        user: { connect: { id: 2 } },
+        court: { connect: { id: 1 } },
+        dateFrom,
+        dateTill,
+      },
+    });
+  });
+
+  it('throws SlotConflictException when an overlapping booking exists', async () => {
+    const { service, prisma } = makeService();
+    withTransaction(prisma);
+    prisma.booking.count.mockResolvedValue(1);
+
+    await expect(service.createIfAvailable(1, 2, dateFrom, dateTill))
+      .rejects.toThrow(SlotConflictException);
+    expect(prisma.booking.create).not.toHaveBeenCalled();
+  });
+
+  it('queries overlaps with correct courtId and date range', async () => {
+    const { service, prisma } = makeService();
+    withTransaction(prisma);
+    prisma.booking.count.mockResolvedValue(0);
+    prisma.booking.create.mockResolvedValue({ id: 1 } as any);
+
+    await service.createIfAvailable(5, 3, dateFrom, dateTill);
+
+    expect(prisma.booking.count).toHaveBeenCalledWith({
+      where: {
+        courtId: 5,
+        AND: [
+          { dateFrom: { lt: dateTill } },
+          { dateTill: { gt: dateFrom } },
+        ],
+      },
+    });
   });
 });
 

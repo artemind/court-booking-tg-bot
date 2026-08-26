@@ -1,4 +1,5 @@
 import { Booking, Prisma, Court, PrismaClient } from '../../generated/prisma';
+import { SlotConflictException } from '../exceptions/slot-conflict.exception';
 
 import dayjs from 'dayjs';
 import { inject, injectable } from 'inversify';
@@ -26,7 +27,7 @@ export class BookingService {
 
   async getByDate(courtId: number, date: dayjs.Dayjs): Promise<Booking[]> {
     const startDate = date.startOf('day').utc();
-    const endDate = date.endOf('day');
+    const endDate = date.endOf('day').utc();
 
     return this.prisma.booking.findMany({
       where: {
@@ -53,6 +54,31 @@ export class BookingService {
       orderBy: {
         dateFrom: 'asc',
       }
+    });
+  }
+
+  async createIfAvailable(courtId: number, userId: number, dateFrom: Date, dateTill: Date): Promise<Booking> {
+    return this.prisma.$transaction(async (tx) => {
+      const conflicts = await tx.booking.count({
+        where: {
+          courtId,
+          AND: [
+            { dateFrom: { lt: dateTill } },
+            { dateTill: { gt: dateFrom } },
+          ],
+        },
+      });
+      if (conflicts > 0) {
+        throw new SlotConflictException();
+      }
+      return tx.booking.create({
+        data: {
+          user: { connect: { id: userId } },
+          court: { connect: { id: courtId } },
+          dateFrom,
+          dateTill,
+        },
+      });
     });
   }
 

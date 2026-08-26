@@ -4,9 +4,11 @@ services:
     image: node:24
     volumes:
       - ./:/usr/src/app
+    depends_on:
+      - postgres
 
   postgres:
-    image: postgres:latest
+    image: postgres:18
     restart: always
     shm_size: 128mb
     environment:
@@ -14,6 +16,6 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     volumes:
-      - ./docker/data/postgres:/var/lib/postgresql/data
+      - ./docker/data/postgres:/var/lib/postgresql
     ports:
       - "5432:5432"

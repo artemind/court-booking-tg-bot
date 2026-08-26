@@ -24,6 +24,7 @@
   },
   "errors": {
     "cannot_create_booking_with_selected_parameters": "Booking with selected parameters unavailable. Please try again",
+    "slot_already_booked": "This time slot is already booked. Please choose another time.",
     "selected_time_already_booked": "Selected time already booked. Please choose another time.",
     "booking_not_found": "Error. Booking not found.",
     "not_authorized_to_cancel_booking": "Error. You are not authorized to cancel this booking."
@@ -39,6 +40,7 @@
   "notification_preferences": "Notification Preferences",
   "booking_created": "Booking created successfully",
   "booking_cancelled": "Booking cancelled successfully",
+  "notification_preferences_updated": "Notification preferences updated successfully",
   "moved_to_main_menu": "You have been moved to the Main Menu",
   "choose_court": "Choose court",
   "choose_date": "Choose date",

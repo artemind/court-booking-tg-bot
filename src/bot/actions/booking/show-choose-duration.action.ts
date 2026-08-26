@@ -5,6 +5,7 @@ import { Booking } from '../../../generated/prisma';
 import { BookingService } from '../../services/booking.service';
 import { ChooseDurationMessage } from '../../messages/booking/choose-duration.message';
 import { ShowChooseTimeAction } from './show-choose-time.action';
+import { ContextManager } from '../../context.manager';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 
@@ -22,15 +23,16 @@ export class ShowChooseDurationAction {
   }
 
   async run(ctx: Context, reply: boolean): Promise<true | Message.TextMessage> {
-    if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.date || !ctx.session.bookingData?.dateAndTime) {
+    if (!ctx.session.bookingData?.courtId || !ctx.session.bookingData?.date || !ctx.session.bookingData?.time) {
       return this.showChooseTimeAction.run(ctx, reply);
     }
+    const dateAndTime = ContextManager.getDateAndTime(ctx)!;
     const bookings: Booking[] = await this.bookingService.getByDate(ctx.session.bookingData.courtId, ctx.session.bookingData.date);
 
     if (reply) {
-      return ChooseDurationMessage.reply(ctx, this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings));
+      return ChooseDurationMessage.reply(ctx, this.bookingSlotService.generateAvailableDurations(dateAndTime, bookings));
     }
 
-    return ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(ctx.session.bookingData.dateAndTime, bookings));
+    return ChooseDurationMessage.editMessageText(ctx, this.bookingSlotService.generateAvailableDurations(dateAndTime, bookings));
   }
 }

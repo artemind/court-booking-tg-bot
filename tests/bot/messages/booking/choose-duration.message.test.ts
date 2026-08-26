@@ -13,7 +13,7 @@ function makeCtx() {
         courtId: 1,
         courtName: 'Court A',
         date: dayjs.utc('2026-05-10'),
-        dateAndTime: dayjs.utc('2026-05-10T10:00:00Z'),
+        time: '10:00',
       },
     },
   });

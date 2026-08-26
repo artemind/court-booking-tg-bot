@@ -22,7 +22,7 @@ describe('NotificationPreferencesUpdatedMessage', () => {
       const ctx = createMockContext();
       await NotificationPreferencesUpdatedMessage.reply(ctx, fakeUser);
       const [text] = (ctx.reply as ReturnType<typeof vi.fn>).mock.calls[0]!;
-      expect(text).toBe('Notification preferences updated successfully');
+      expect(text).toBe('notification_preferences_updated');
     });
 
     it('calls ctx.reply with a keyboard as second argument', async () => {

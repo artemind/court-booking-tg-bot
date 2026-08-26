@@ -20,20 +20,18 @@ export class ConfigureNotificationPreferencesHandler implements IHandler {
   ) {}
 
   async register(): Promise<void> {
-    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_starts_enabled'), async (ctx: Context): Promise<Message.TextMessage> => {
-      return this.updateNotificationPreferencesAction.disableNotificationBeforeBookingStarts(ctx);
-    });
+    const action = this.updateNotificationPreferencesAction;
 
-    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_starts_disabled'), async (ctx: Context): Promise<Message.TextMessage> => {
-      return this.updateNotificationPreferencesAction.enableNotificationBeforeBookingStarts(ctx);
-    });
+    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_starts_enabled'), (ctx: Context): Promise<Message.TextMessage> =>
+      action.run(ctx, 'notifyBeforeBookingStarts', false));
 
-    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_ends_enabled'), async (ctx: Context): Promise<Message.TextMessage> => {
-      return this.updateNotificationPreferencesAction.disableNotificationBeforeBookingEnds(ctx);
-    });
+    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_starts_disabled'), (ctx: Context): Promise<Message.TextMessage> =>
+      action.run(ctx, 'notifyBeforeBookingStarts', true));
 
-    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_ends_disabled'), async (ctx: Context): Promise<Message.TextMessage> => {
-      return this.updateNotificationPreferencesAction.enableNotificationBeforeBookingEnds(ctx);
-    });
+    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_ends_enabled'), (ctx: Context): Promise<Message.TextMessage> =>
+      action.run(ctx, 'notifyBeforeBookingEnds', false));
+
+    this.bot.hears(match('keyboards.notification_preferences.notify_before_booking_ends_disabled'), (ctx: Context): Promise<Message.TextMessage> =>
+      action.run(ctx, 'notifyBeforeBookingEnds', true));
   }
 }
