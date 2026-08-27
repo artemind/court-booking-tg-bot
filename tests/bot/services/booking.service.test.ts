@@ -231,37 +231,78 @@ describe('getUpcomingByUserId', () => {
 // getBookingsToBeNotified
 // ─────────────────────────────────────────────
 describe('getBookingsToBeNotified', () => {
-  it('truncates date to startOf("minute") before computing targets', async () => {
+  // Two queries are issued: [0] = upcoming starts, [1] = upcoming ends.
+
+  function startQuery(prisma: ReturnType<typeof makeService>['prisma']) {
+    return prisma.booking.findMany.mock.calls[0]![0] as any;
+  }
+
+  function endQuery(prisma: ReturnType<typeof makeService>['prisma']) {
+    return prisma.booking.findMany.mock.calls[1]![0] as any;
+  }
+
+  it('queries a window from now (exclusive) up to now + lead time (inclusive)', async () => {
     const { service, prisma } = makeService();
     prisma.booking.findMany.mockResolvedValue([]);
 
     // 10:05:45 → startOf('minute') = 10:05:00
-    const date = dayjs.utc('2024-06-01T10:05:45Z');
-    await service.getBookingsToBeNotified(date, 30, 15);
+    await service.getBookingsToBeNotified(dayjs.utc('2024-06-01T10:05:45Z'), 30, 15);
 
-    const call = prisma.booking.findMany.mock.calls[0]![0] as any;
-    const orClause = call.where.OR;
-    expect(orClause[0].dateFrom).toEqual(new Date('2024-06-01T10:35:00.000Z')); // 10:05 + 30
-    expect(orClause[1].dateTill).toEqual(new Date('2024-06-01T10:20:00.000Z')); // 10:05 + 15
+    expect(startQuery(prisma).where.dateFrom).toEqual({
+      gt: new Date('2024-06-01T10:05:00.000Z'),
+      lte: new Date('2024-06-01T10:35:00.000Z'),
+    });
+    expect(endQuery(prisma).where.dateTill).toEqual({
+      gt: new Date('2024-06-01T10:05:00.000Z'),
+      lte: new Date('2024-06-01T10:20:00.000Z'),
+    });
   });
 
-  it('includes both OR conditions in a single query', async () => {
+  it('excludes notifications that were already delivered', async () => {
     const { service, prisma } = makeService();
     prisma.booking.findMany.mockResolvedValue([]);
 
-    const date = dayjs.utc('2024-06-01T10:00:00Z');
-    await service.getBookingsToBeNotified(date, 30, 15);
+    await service.getBookingsToBeNotified(dayjs.utc('2024-06-01T10:00:00Z'), 30, 15);
 
-    const call = prisma.booking.findMany.mock.calls[0]![0] as any;
-    expect(call.where.OR).toHaveLength(2);
-    expect(call.where.OR[0]).toMatchObject({
-      user: { notifyBeforeBookingStarts: true },
-      dateFrom: new Date('2024-06-01T10:30:00.000Z'),
-    });
-    expect(call.where.OR[1]).toMatchObject({
-      user: { notifyBeforeBookingEnds: true },
-      dateTill: new Date('2024-06-01T10:15:00.000Z'),
-    });
+    expect(startQuery(prisma).where.notifiedBeforeStartAt).toBeNull();
+    expect(endQuery(prisma).where.notifiedBeforeEndAt).toBeNull();
+  });
+
+  it('respects the per-user notification preferences', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.findMany.mockResolvedValue([]);
+
+    await service.getBookingsToBeNotified(dayjs.utc('2024-06-01T10:00:00Z'), 30, 15);
+
+    expect(startQuery(prisma).where.user).toEqual({ notifyBeforeBookingStarts: true });
+    expect(endQuery(prisma).where.user).toEqual({ notifyBeforeBookingEnds: true });
+  });
+
+  it('tags each result with its notification kind', async () => {
+    const { service, prisma } = makeService();
+    const starting = { id: 1 } as any;
+    const ending = { id: 2 } as any;
+    prisma.booking.findMany
+      .mockResolvedValueOnce([starting])
+      .mockResolvedValueOnce([ending]);
+
+    const result = await service.getBookingsToBeNotified(dayjs.utc(), 30, 15);
+
+    expect(result).toEqual([
+      { kind: 'start', booking: starting },
+      { kind: 'end', booking: ending },
+    ]);
+  });
+
+  it('returns both notifications when one booking is due for start and end', async () => {
+    const { service, prisma } = makeService();
+    const booking = { id: 7 } as any;
+    prisma.booking.findMany.mockResolvedValue([booking]);
+
+    const result = await service.getBookingsToBeNotified(dayjs.utc(), 30, 15);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(n => n.kind)).toEqual(['start', 'end']);
   });
 
   it('returns empty array when nothing matches', async () => {
@@ -272,16 +313,75 @@ describe('getBookingsToBeNotified', () => {
     expect(result).toEqual([]);
   });
 
-  it('includes user (telegramId, languageCode) and court in the result', async () => {
+  it('includes user (telegramId, languageCode) and court in both queries', async () => {
     const { service, prisma } = makeService();
     prisma.booking.findMany.mockResolvedValue([]);
 
     await service.getBookingsToBeNotified(dayjs.utc('2024-06-01T10:00:00Z'), 30, 15);
 
-    const call = prisma.booking.findMany.mock.calls[0]![0] as any;
-    expect(call.include).toMatchObject({
+    const expected = {
       user: { select: { telegramId: true, languageCode: true } },
       court: true,
+    };
+    expect(startQuery(prisma).include).toMatchObject(expected);
+    expect(endQuery(prisma).include).toMatchObject(expected);
+  });
+});
+
+// ─────────────────────────────────────────────
+// claimNotification
+// ─────────────────────────────────────────────
+describe('claimNotification', () => {
+  it('marks the start notification only while it is still unclaimed', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.updateMany.mockResolvedValue({ count: 1 });
+    const at = new Date('2024-06-01T10:00:00.000Z');
+
+    const result = await service.claimNotification(42, 'start', at);
+
+    expect(prisma.booking.updateMany).toHaveBeenCalledWith({
+      where: { id: 42, notifiedBeforeStartAt: null },
+      data: { notifiedBeforeStartAt: at },
+    });
+    expect(result).toBe(true);
+  });
+
+  it('uses the end field for end notifications', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.updateMany.mockResolvedValue({ count: 1 });
+    const at = new Date('2024-06-01T10:00:00.000Z');
+
+    await service.claimNotification(42, 'end', at);
+
+    expect(prisma.booking.updateMany).toHaveBeenCalledWith({
+      where: { id: 42, notifiedBeforeEndAt: null },
+      data: { notifiedBeforeEndAt: at },
+    });
+  });
+
+  it('returns false when the notification was already claimed', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.updateMany.mockResolvedValue({ count: 0 });
+
+    const result = await service.claimNotification(42, 'start', new Date());
+
+    expect(result).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────
+// releaseNotification
+// ─────────────────────────────────────────────
+describe('releaseNotification', () => {
+  it('clears the mark so the notification is retried', async () => {
+    const { service, prisma } = makeService();
+    prisma.booking.updateMany.mockResolvedValue({ count: 1 });
+
+    await service.releaseNotification(42, 'end');
+
+    expect(prisma.booking.updateMany).toHaveBeenCalledWith({
+      where: { id: 42 },
+      data: { notifiedBeforeEndAt: null },
     });
   });
 });

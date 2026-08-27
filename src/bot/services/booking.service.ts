@@ -5,6 +5,23 @@ import dayjs from 'dayjs';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 
+export type NotificationKind = 'start' | 'end';
+
+export type NotifiableBooking = Booking & {
+  user: { telegramId: bigint, languageCode: string | null },
+  court: Court,
+};
+
+export interface PendingNotification {
+  kind: NotificationKind;
+  booking: NotifiableBooking;
+}
+
+const NOTIFIED_AT_FIELD: Record<NotificationKind, 'notifiedBeforeStartAt' | 'notifiedBeforeEndAt'> = {
+  start: 'notifiedBeforeStartAt',
+  end: 'notifiedBeforeEndAt',
+};
+
 @injectable()
 @provide()
 export class BookingService {
@@ -82,31 +99,80 @@ export class BookingService {
     });
   }
 
-  async getBookingsToBeNotified(date: dayjs.Dayjs, minutesBeforeBookingStarts: number, minutesBeforeBookingEnds: number): Promise<(Booking & { user: {telegramId: bigint, languageCode: string|null}, court: Court } )[]> {
-    date = date.utc().startOf('minute');
-
-    return this.prisma.booking.findMany({
-      where: {
-        OR: [
-          {
-            user: { notifyBeforeBookingStarts: true },
-            dateFrom: date.add(minutesBeforeBookingStarts, 'minute').toDate()
-          },
-          {
-            user: { notifyBeforeBookingEnds: true },
-            dateTill: date.add(minutesBeforeBookingEnds, 'minute').toDate()
-          }
-        ]
+  /**
+   * Returns notifications that are due but not yet delivered.
+   *
+   * The window is `(now, now + minutesBefore*]` rather than an exact timestamp match: a booking
+   * whose start/end falls anywhere inside the lead time is picked up on the next tick, regardless
+   * of whether it aligns with the scheduler's interval or the configured slot size. Already
+   * delivered notifications are excluded via the `notified*At` marks, so widening the window
+   * cannot produce duplicates and a missed tick is caught up on the following one.
+   */
+  async getBookingsToBeNotified(date: dayjs.Dayjs, minutesBeforeBookingStarts: number, minutesBeforeBookingEnds: number): Promise<PendingNotification[]> {
+    const now = date.utc().startOf('minute');
+    const include = {
+      user: {
+        select: {
+          telegramId: true,
+          languageCode: true,
+        }
       },
-      include: {
-        user: {
-          select: {
-            telegramId: true,
-            languageCode: true,
-          }
+      court: true,
+    };
+
+    const [starting, ending] = await Promise.all([
+      this.prisma.booking.findMany({
+        where: {
+          notifiedBeforeStartAt: null,
+          user: { notifyBeforeBookingStarts: true },
+          dateFrom: {
+            gt: now.toDate(),
+            lte: now.add(minutesBeforeBookingStarts, 'minute').toDate(),
+          },
         },
-        court: true,
-      }
+        include,
+      }),
+      this.prisma.booking.findMany({
+        where: {
+          notifiedBeforeEndAt: null,
+          user: { notifyBeforeBookingEnds: true },
+          dateTill: {
+            gt: now.toDate(),
+            lte: now.add(minutesBeforeBookingEnds, 'minute').toDate(),
+          },
+        },
+        include,
+      }),
+    ]);
+
+    return [
+      ...starting.map((booking): PendingNotification => ({ kind: 'start', booking })),
+      ...ending.map((booking): PendingNotification => ({ kind: 'end', booking })),
+    ];
+  }
+
+  /**
+   * Atomically marks a notification as delivered. Returns false when another tick or another bot
+   * instance already claimed it, in which case the caller must not send anything.
+   */
+  async claimNotification(bookingId: number, kind: NotificationKind, at: Date): Promise<boolean> {
+    const field = NOTIFIED_AT_FIELD[kind];
+    const { count } = await this.prisma.booking.updateMany({
+      where: { id: bookingId, [field]: null },
+      data: { [field]: at },
+    });
+
+    return count > 0;
+  }
+
+  /**
+   * Releases a claim so the notification is retried on a later tick. Used when delivery fails.
+   */
+  async releaseNotification(bookingId: number, kind: NotificationKind): Promise<void> {
+    const field = NOTIFIED_AT_FIELD[kind];
+    await this.prisma.booking.updateMany({
+      where: { id: bookingId },
+      data: { [field]: null },
     });
   }
 }

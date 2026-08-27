@@ -1,12 +1,17 @@
 import { Context } from '../../context';
 import type { Message } from 'telegraf/types';
-import { Booking, Court } from '../../../generated/prisma';
 import { Telegraf } from 'telegraf';
 import dayjs from 'dayjs';
 import { BookingFormatter } from '../../formatters/booking.formatter';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 import { I18n } from '@edjopato/telegraf-i18n';
+import type { NotifiableBooking, NotificationKind } from '../../services/booking.service';
+
+const NOTIFICATION_PRESENTATION: Record<NotificationKind, { emoji: string, i18nKey: string }> = {
+  start: { emoji: '⏳', i18nKey: 'notifications.before_booking_starts' },
+  end: { emoji: '⌛️', i18nKey: 'notifications.before_booking_ends' },
+};
 
 @injectable()
 @provide()
@@ -19,22 +24,14 @@ export class SendNotificationAction {
   ) {
   }
 
-  async run(bot: Telegraf<Context>, booking: Booking & { user: {telegramId: bigint, languageCode: string|null}, court: Court }): Promise<undefined | Message.TextMessage> {
+  async run(bot: Telegraf<Context>, booking: NotifiableBooking, kind: NotificationKind): Promise<Message.TextMessage> {
     const languageCode = booking.user.languageCode || this.defaultLanguageCode;
     const now = dayjs.utc().startOf('minute');
-    const startDate = dayjs(booking.dateFrom).utc();
-    const endDate = dayjs(booking.dateTill).utc();
+    const eventDate = dayjs(kind === 'start' ? booking.dateFrom : booking.dateTill).utc();
+    const minutes = Math.max(0, eventDate.diff(now, 'minute'));
 
-    let message: string;
-    if (now.isBefore(startDate)) {
-      const minutesToEventStart = startDate.diff(now, 'minute');
-      message = `⏳ ${this.i18n.t(languageCode, 'notifications.before_booking_starts', {minutes: minutesToEventStart})}`;
-    } else if (now.isBefore(endDate)) {
-      const minutesToEventEnd = endDate.diff(now, 'minute');
-      message = `⌛️ ${this.i18n.t(languageCode, 'notifications.before_booking_ends', {minutes: minutesToEventEnd})}`;
-    } else {
-      return;
-    }
+    const { emoji, i18nKey } = NOTIFICATION_PRESENTATION[kind];
+    const message = `${emoji} ${this.i18n.t(languageCode, i18nKey, { minutes })}`;
     const formattedBooking = BookingFormatter.format(this.i18n, booking, languageCode);
 
     return bot.telegram.sendMessage(booking.user.telegramId.toString(), `*${message}*\n\n${formattedBooking}`, {

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- `notifiedBeforeStartAt` / `notifiedBeforeEndAt` fields on `Booking` (migration `add_notification_delivery_marks`) marking a notification as delivered
+- `BookingService.claimNotification()` / `BookingService.releaseNotification()` — a notification is claimed atomically before it is sent and released when delivery fails, so it is retried on a later tick
+- `NotificationScheduler.stop()` and the exported `NOTIFICATION_CRON_EXPRESSION`
+- Tests for the notification window, delivery marks, claim/release, and the scheduler failure paths
+
+### Changed
+- `BookingService.getBookingsToBeNotified()` returns `PendingNotification[]` tagged with a `kind` (`start` / `end`) instead of raw bookings; a single booking can now yield both notifications
+- `SendNotificationAction.run()` takes the notification kind explicitly instead of inferring it from the current time
+- `NotificationScheduler` runs every minute instead of every 15 minutes, since the notification lead times are configurable and need not align with a coarser interval
+- Failed notification deliveries are logged with the booking id and notification kind instead of being discarded by `Promise.allSettled`
+
+### Fixed
+- Notifications were silently never sent when booking start/end times did not fall exactly on the scheduler tick, because the query matched an exact timestamp. Everything due within the lead time is now selected, so a missed tick is caught up on the next one and a duplicate is prevented by the delivery marks
+- A start notification delivered late was rendered as an end notification
+- A failure while loading due notifications no longer escapes the cron callback as an unhandled rejection
+
 ## [2.2.0] - 2026-08-26
 
 ### Added
