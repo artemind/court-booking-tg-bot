@@ -49,7 +49,38 @@ async function bootstrap(): Promise<void> {
   configureDayjs();
   const container = await buildContainer();
   const bot = new Bot(container);
+  const prisma = container.get(PrismaClient);
+
+  let shuttingDown = false;
+  const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.error(`Received ${signal}, shutting down`);
+    try {
+      bot.stop(signal);
+      await prisma.$disconnect();
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during shutdown', error);
+      process.exit(1);
+    }
+  };
+
+  process.once('SIGINT', signal => void shutdown(signal));
+  process.once('SIGTERM', signal => void shutdown(signal));
+  process.on('unhandledRejection', reason => {
+    console.error('Unhandled rejection', reason);
+    process.exit(1);
+  });
+  process.on('uncaughtException', error => {
+    console.error('Uncaught exception', error);
+    process.exit(1);
+  });
+
   await bot.launch();
 }
 
-bootstrap().catch(console.error);
+bootstrap().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

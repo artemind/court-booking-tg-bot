@@ -49,19 +49,28 @@ export class Bot {
 
   async launch(): Promise<void> {
     this.registerMiddlewares();
-    await this.registerErrorHandler();
+    this.registerErrorHandler();
     await this.registerHandlers();
     this.container.get(NotificationScheduler).start();
     await this.bot.launch();
   }
 
-  private async registerErrorHandler(): Promise<void> {
-    this.bot.catch((err, ctx) => {
+  stop(reason?: string): void {
+    this.container.get(NotificationScheduler).stop();
+    this.bot.stop(reason);
+  }
+
+  private registerErrorHandler(): void {
+    this.bot.catch(async (err, ctx) => {
       console.error(err);
-      if (err instanceof ReplyableException) {
-        ctx.reply(`${ctx.i18n.t('exceptions.oops')}: ${err.message}`);
-      } else {
-        ctx.reply(ctx.i18n.t('exceptions.oops'));
+      try {
+        if (err instanceof ReplyableException) {
+          await ctx.reply(`${ctx.i18n.t('exceptions.oops')}: ${err.message}`);
+        } else {
+          await ctx.reply(ctx.i18n.t('exceptions.oops'));
+        }
+      } catch (replyError) {
+        console.error('Failed to notify user about an error', replyError);
       }
     });
   }

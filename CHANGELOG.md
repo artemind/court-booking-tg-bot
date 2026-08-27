@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 - `BookingService.claimNotification()` / `BookingService.releaseNotification()` — a notification is claimed atomically before it is sent and released when delivery fails, so it is retried on a later tick
 - `NotificationScheduler.stop()` and the exported `NOTIFICATION_CRON_EXPRESSION`
 - Tests for the notification window, delivery marks, claim/release, and the scheduler failure paths
+- Graceful shutdown: `SIGINT`/`SIGTERM` stop the bot and the notification scheduler and disconnect Prisma before exit; `unhandledRejection`/`uncaughtException` are logged and exit the process with code 1
+- `Bot.stop()`
 
 ### Changed
 - All `TIMESTAMP(3)` columns on `bookings` and `users` converted to `TIMESTAMPTZ(3)` (migration `convert_timestamps_to_timestamptz`), matching the app's UTC-based `dayjs` usage
@@ -24,6 +26,8 @@ All notable changes to this project will be documented in this file.
 - Notifications were silently never sent when booking start/end times did not fall exactly on the scheduler tick, because the query matched an exact timestamp. Everything due within the lead time is now selected, so a missed tick is caught up on the next one and a duplicate is prevented by the delivery marks
 - A start notification delivered late was rendered as an end notification
 - A failure while loading due notifications no longer escapes the cron callback as an unhandled rejection
+- `bootstrap()` failing on startup now exits with a non-zero code instead of just logging
+- A failed reply from `bot.catch` (bot blocked, callback expired) no longer escapes as an unhandled rejection
 
 ## [2.2.0] - 2026-08-26
 
