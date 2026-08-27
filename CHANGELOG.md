@@ -15,8 +15,10 @@ All notable changes to this project will be documented in this file.
 - `SendNotificationAction.run()` takes the notification kind explicitly instead of inferring it from the current time
 - `NotificationScheduler` runs every minute instead of every 15 minutes, since the notification lead times are configurable and need not align with a coarser interval
 - Failed notification deliveries are logged with the booking id and notification kind instead of being discarded by `Promise.allSettled`
+- `User.telegramUsername` is now nullable (migration `make_telegram_username_nullable`), since a Telegram username is optional
 
 ### Fixed
+- Users without a Telegram `@username` were unable to use the bot at all: `AppendUserMiddleware` threw `UserNotFoundException` for them. The guard now only requires a Telegram id
 - Notifications were silently never sent when booking start/end times did not fall exactly on the scheduler tick, because the query matched an exact timestamp. Everything due within the lead time is now selected, so a missed tick is caught up on the next one and a duplicate is prevented by the delivery marks
 - A start notification delivered late was rendered as an end notification
 - A failure while loading due notifications no longer escapes the cron callback as an unhandled rejection

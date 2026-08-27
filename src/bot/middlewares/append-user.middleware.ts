@@ -13,10 +13,10 @@ export class AppendUserMiddleware {
   middleware(): (ctx: Context, next: () => Promise<void>) => Promise<void> {
     return async (ctx: Context, next: () => Promise<void>): Promise<void> => {
       const name = `${ctx.from?.first_name ?? ''} ${ctx.from?.last_name ?? ''}`.trim();
-      const telegramUsername = ctx.from?.username;
+      const telegramUsername = ctx.from?.username ?? null;
       const languageCode = ctx.from?.language_code || null;
       const telegramId = ctx.from?.id;
-      if (!telegramId || !telegramUsername) {
+      if (!telegramId) {
         throw new UserNotFoundException(ctx.i18n);
       }
 

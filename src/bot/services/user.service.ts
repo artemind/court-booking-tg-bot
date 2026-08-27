@@ -28,7 +28,7 @@ export class UserService {
   async upsert(data: {
     telegramId: number;
     name: string;
-    telegramUsername: string;
+    telegramUsername: string | null;
     languageCode: string | null;
   }): Promise<User> {
     const existing = await this.findByTelegramId(data.telegramId);
