@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-08-26
+
+### Added
+- `CreateBookingAction` — booking creation extracted from the duration handler
+- `BookingService.createIfAvailable()` — creates a booking inside a transaction and throws `SlotConflictException` when the slot is already taken
+- `SlotConflictException` with the `errors.slot_already_booked` message in `en`/`uk` locales
+- `UserService.upsert()` used by `AppendUserMiddleware` instead of the manual find/create/update branching
+- `UserNotFoundException` thrown by `AppendUserMiddleware` when the Telegram user data is missing
+- `parseIntSafe()` utility and safer parsing of callback data across handlers
+- `notification_preferences_updated` locale key
+- Unit tests for the new actions (`choose-date`, `choose-time`, `create-booking`), `UserService.upsert()`, and booking conflict handling
+
+### Changed
+- `CronHandler` replaced with `NotificationScheduler` (tests renamed accordingly)
+- Booking configuration centralized into `IBookingConfig` / `BOOKING_CONFIG_TOKEN` instead of reading env vars in place
+- Date and time selection decoupled into separate `ChooseDateAction` / `ChooseTimeAction` and their handlers
+- Session `dateAndTime` replaced with separate `date` and `time` fields
+- Notification preferences logic consolidated into a single `run` method
+- Booking exceptions propagated for centralized handling in `bot.ts`
+- App initialization and dependency binding simplified in `app.ts`
+- Tests compute future booking dates dynamically instead of using fixed dates
+
+### Fixed
+- `BookingService.getByDate()` now converts the end of the day to UTC
+
+### Chore
+- `tsconfig.json`: added `include` for TypeScript file discovery
+- Docker: pinned `postgres:18`, fixed the data volume path, and made `node` depend on `postgres`
+- Updated dependencies in `package-lock.json`
+
 ## [2.1.0] - 2026-05-02
 
 ### Added
