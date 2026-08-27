@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import dayjs from 'dayjs';
 import { SendNotificationAction } from '../../../../src/bot/actions/booking/send-notification.action';
 import { BookingFormatter } from '../../../../src/bot/formatters/booking.formatter';
-import type { Booking, Court } from '../../../../src/generated/prisma';
+import type { NotifiableBooking } from '../../../../src/bot/services/booking.service';
+import type { Court } from '../../../../src/generated/prisma';
 
 const FIXED_NOW = '2026-05-10T10:00:00.000Z';
 
@@ -10,11 +11,21 @@ const fakeBookingBase = {
   id: 1,
   courtId: 1,
   userId: 1,
+  notifiedBeforeStartAt: null,
+  notifiedBeforeEndAt: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-  court: { id: 1, name: 'Court A', createdAt: new Date(), updatedAt: new Date() } as Court,
+  court: { id: 1, name: 'Court A' } as Court,
   user: { telegramId: BigInt(123456), languageCode: 'en' },
-} as unknown as Booking & { user: { telegramId: bigint; languageCode: string | null }; court: Court };
+} as unknown as NotifiableBooking;
+
+function bookingAt(startOffsetMinutes: number, endOffsetMinutes: number): NotifiableBooking {
+  return {
+    ...fakeBookingBase,
+    dateFrom: dayjs.utc(FIXED_NOW).add(startOffsetMinutes, 'minutes').toDate(),
+    dateTill: dayjs.utc(FIXED_NOW).add(endOffsetMinutes, 'minutes').toDate(),
+  };
+}
 
 function makeAction(defaultLocale = 'en') {
   const i18n = { t: vi.fn((locale: string, key: string) => `${locale}:${key}`) } as any;
@@ -42,84 +53,70 @@ describe('SendNotificationAction', () => {
     vi.useRealTimers();
   });
 
-  describe('booking start notification (30 min before)', () => {
-    it('sends a message when now + 30 min equals booking.dateFrom', async () => {
+  describe('booking start notification', () => {
+    it('sends a message and returns it', async () => {
       const { action } = makeAction();
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(90, 'minutes').toISOString()),
-      };
 
-      const result = await action.run(bot, booking);
+      const result = await action.run(bot, bookingAt(30, 90), 'start');
 
       expect(bot.telegram.sendMessage).toHaveBeenCalledOnce();
       expect(result).toEqual({ message_id: 42 });
     });
 
-    it('includes before_booking_starts key in the message', async () => {
-      const { action } = makeAction();
+    it('uses the before_booking_starts key with the remaining minutes', async () => {
+      const { action, i18n } = makeAction();
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(90, 'minutes').toISOString()),
-      };
 
-      await action.run(bot, booking);
+      await action.run(bot, bookingAt(30, 90), 'start');
 
+      expect(i18n.t).toHaveBeenCalledWith('en', 'notifications.before_booking_starts', { minutes: 30 });
       const [, message] = bot.telegram.sendMessage.mock.calls[0]!;
       expect(message).toContain('notifications.before_booking_starts');
     });
+
+    it('reports the real remaining minutes when delivered late', async () => {
+      const { action, i18n } = makeAction();
+      const bot = makeBot();
+
+      // Lead time is 30 min but the tick ran 8 minutes late.
+      await action.run(bot, bookingAt(22, 82), 'start');
+
+      expect(i18n.t).toHaveBeenCalledWith('en', 'notifications.before_booking_starts', { minutes: 22 });
+    });
   });
 
-  describe('booking end notification (15 min before)', () => {
-    it('sends a message when now + 15 min equals booking.dateTill', async () => {
-      const { action } = makeAction();
+  describe('booking end notification', () => {
+    it('uses the before_booking_ends key with the remaining minutes', async () => {
+      const { action, i18n } = makeAction();
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).subtract(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(15, 'minutes').toISOString()),
-      };
 
-      const result = await action.run(bot, booking);
+      await action.run(bot, bookingAt(-30, 15), 'end');
 
-      expect(bot.telegram.sendMessage).toHaveBeenCalledOnce();
-      expect(result).toEqual({ message_id: 42 });
-    });
-
-    it('includes before_booking_ends key in the message', async () => {
-      const { action } = makeAction();
-      const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).subtract(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(15, 'minutes').toISOString()),
-      };
-
-      await action.run(bot, booking);
-
+      expect(i18n.t).toHaveBeenCalledWith('en', 'notifications.before_booking_ends', { minutes: 15 });
       const [, message] = bot.telegram.sendMessage.mock.calls[0]!;
       expect(message).toContain('notifications.before_booking_ends');
     });
+
+    it('does not fall back to the start wording once the booking has begun', async () => {
+      const { action, i18n } = makeAction();
+      const bot = makeBot();
+
+      await action.run(bot, bookingAt(-30, 15), 'end');
+
+      expect(i18n.t).not.toHaveBeenCalledWith('en', 'notifications.before_booking_starts', expect.anything());
+    });
   });
 
-  describe('no notification needed', () => {
-    it('returns undefined when booking has already ended', async () => {
-      const { action } = makeAction();
+  describe('clock edge cases', () => {
+    it('never reports negative minutes', async () => {
+      const { action, i18n } = makeAction();
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).subtract(60, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).subtract(30, 'minutes').toISOString()),
-      };
 
-      const result = await action.run(bot, booking);
+      await action.run(bot, bookingAt(-60, -30), 'end');
 
-      expect(result).toBeUndefined();
-      expect(bot.telegram.sendMessage).not.toHaveBeenCalled();
+      expect(i18n.t).toHaveBeenCalledWith('en', 'notifications.before_booking_ends', { minutes: 0 });
+      expect(bot.telegram.sendMessage).toHaveBeenCalledOnce();
     });
   });
 
@@ -127,14 +124,9 @@ describe('SendNotificationAction', () => {
     it("uses user's languageCode when present", async () => {
       const { action, i18n } = makeAction('en');
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        user: { telegramId: BigInt(123456), languageCode: 'uk' },
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(90, 'minutes').toISOString()),
-      };
+      const booking = { ...bookingAt(30, 90), user: { telegramId: BigInt(123456), languageCode: 'uk' } };
 
-      await action.run(bot, booking);
+      await action.run(bot, booking, 'start');
 
       expect(i18n.t).toHaveBeenCalledWith('uk', expect.any(String), expect.any(Object));
     });
@@ -142,14 +134,9 @@ describe('SendNotificationAction', () => {
     it('falls back to default locale when user languageCode is null', async () => {
       const { action, i18n } = makeAction('en');
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        user: { telegramId: BigInt(123456), languageCode: null },
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(90, 'minutes').toISOString()),
-      };
+      const booking = { ...bookingAt(30, 90), user: { telegramId: BigInt(123456), languageCode: null } };
 
-      await action.run(bot, booking);
+      await action.run(bot, booking, 'start');
 
       expect(i18n.t).toHaveBeenCalledWith('en', expect.any(String), expect.any(Object));
     });
@@ -157,14 +144,9 @@ describe('SendNotificationAction', () => {
     it('sends message to user telegramId', async () => {
       const { action } = makeAction();
       const bot = makeBot();
-      const booking = {
-        ...fakeBookingBase,
-        user: { telegramId: BigInt(999888), languageCode: 'en' },
-        dateFrom: new Date(dayjs.utc(FIXED_NOW).add(30, 'minutes').toISOString()),
-        dateTill: new Date(dayjs.utc(FIXED_NOW).add(90, 'minutes').toISOString()),
-      };
+      const booking = { ...bookingAt(30, 90), user: { telegramId: BigInt(999888), languageCode: 'en' } };
 
-      await action.run(bot, booking);
+      await action.run(bot, booking, 'start');
 
       const [telegramId] = bot.telegram.sendMessage.mock.calls[0]!;
       expect(telegramId).toBe('999888');

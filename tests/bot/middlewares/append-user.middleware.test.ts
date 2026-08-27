@@ -48,14 +48,26 @@ describe('AppendUserMiddleware', () => {
       expect(next).not.toHaveBeenCalled();
       expect(userService.upsert).not.toHaveBeenCalled();
     });
+  });
 
-    it('throws UserNotFoundException when ctx.from has no username', async () => {
+  describe('users without a telegram username', () => {
+    it('upserts with telegramUsername null and calls next', async () => {
+      const user = mockUser({ telegramUsername: null });
+      userService.upsert.mockResolvedValue(user);
+
       const ctx = createMockContext({
         from: { id: 1, first_name: 'Test', is_bot: false } as any,
       });
-      await expect(middleware(ctx, next)).rejects.toBeInstanceOf(UserNotFoundException);
-      expect(next).not.toHaveBeenCalled();
-      expect(userService.upsert).not.toHaveBeenCalled();
+      await middleware(ctx, next);
+
+      expect(userService.upsert).toHaveBeenCalledWith({
+        name: 'Test',
+        telegramId: 1,
+        telegramUsername: null,
+        languageCode: null,
+      });
+      expect(ctx.user).toBe(user);
+      expect(next).toHaveBeenCalledOnce();
     });
   });
 
