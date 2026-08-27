@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.3.0] - 2026-08-27
 
 ### Added
 - Indexes on `Booking`: `[courtId, dateFrom]`, `[userId, dateTill]`, `[notifiedBeforeStartAt, dateFrom]`, `[notifiedBeforeEndAt, dateTill]` (migration `add_booking_indexes`), covering `getByDate`, `createIfAvailable`, `getUpcomingByUserId`, and `getBookingsToBeNotified`
