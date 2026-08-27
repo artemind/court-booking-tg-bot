@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Indexes on `Booking`: `[courtId, dateFrom]`, `[userId, dateTill]`, `[notifiedBeforeStartAt, dateFrom]`, `[notifiedBeforeEndAt, dateTill]` (migration `add_booking_indexes`), covering `getByDate`, `createIfAvailable`, `getUpcomingByUserId`, and `getBookingsToBeNotified`
 - `notifiedBeforeStartAt` / `notifiedBeforeEndAt` fields on `Booking` (migration `add_notification_delivery_marks`) marking a notification as delivered
 - `BookingService.claimNotification()` / `BookingService.releaseNotification()` — a notification is claimed atomically before it is sent and released when delivery fails, so it is retried on a later tick
 - `NotificationScheduler.stop()` and the exported `NOTIFICATION_CRON_EXPRESSION`
 - Tests for the notification window, delivery marks, claim/release, and the scheduler failure paths
 
 ### Changed
+- All `TIMESTAMP(3)` columns on `bookings` and `users` converted to `TIMESTAMPTZ(3)` (migration `convert_timestamps_to_timestamptz`), matching the app's UTC-based `dayjs` usage
 - `BookingService.getBookingsToBeNotified()` returns `PendingNotification[]` tagged with a `kind` (`start` / `end`) instead of raw bookings; a single booking can now yield both notifications
 - `SendNotificationAction.run()` takes the notification kind explicitly instead of inferring it from the current time
 - `NotificationScheduler` runs every minute instead of every 15 minutes, since the notification lead times are configurable and need not align with a coarser interval

@@ -2,14 +2,21 @@ model Booking {
   id                    Int       @id @default(autoincrement())
   userId                Int       @map("user_id")
   courtId               Int       @map("court_id")
-  dateFrom              DateTime  @map("date_from")
-  dateTill              DateTime  @map("date_till")
-  notifiedBeforeStartAt DateTime? @map("notified_before_start_at")
-  notifiedBeforeEndAt   DateTime? @map("notified_before_end_at")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
+  dateFrom              DateTime  @map("date_from") @db.Timestamptz(3)
+  dateTill              DateTime  @map("date_till") @db.Timestamptz(3)
+  notifiedBeforeStartAt DateTime? @map("notified_before_start_at") @db.Timestamptz(3)
+  notifiedBeforeEndAt   DateTime? @map("notified_before_end_at") @db.Timestamptz(3)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   court                 Court     @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  // getByDate + createIfAvailable: court-scoped range scan over dateFrom.
+  @@index([courtId, dateFrom])
+  // getUpcomingByUserId: user-scoped range scan over dateTill.
+  @@index([userId, dateTill])
+  // getBookingsToBeNotified: undelivered marks first, then the due-time window.
+  @@index([notifiedBeforeStartAt, dateFrom])
+  @@index([notifiedBeforeEndAt, dateTill])
   @@map("bookings")
 }

@@ -7,8 +7,8 @@ model User {
   isAccessRestricted        Boolean   @default(false) @map("is_access_restricted")
   notifyBeforeBookingStarts Boolean   @default(true) @map("notify_before_booking_starts")
   notifyBeforeBookingEnds   Boolean   @default(true) @map("notify_before_booking_ends")
-  createdAt                 DateTime  @default(now()) @map("created_at")
-  updatedAt                 DateTime  @updatedAt @map("updated_at")
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                 DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   bookings                  Booking[]
 
   @@map("users")
