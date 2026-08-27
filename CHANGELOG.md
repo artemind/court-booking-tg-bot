@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - `SlotConflictException` (and every other `ReplyableException`) rendered with an empty message because `i18n` was only resolved at construction time, and `SlotConflictException` was the one exception created without it. `bot.catch` now resolves the message from a public `i18nKey` via `ctx.i18n`, so `errors.slot_already_booked` is actually shown
+- Notification preferences keyboard hardcoded "30 min before the start" / "15 min to the end" in `locales/*.json`, out of sync with the configurable `NOTIFICATION_MINUTES_BEFORE_START` / `NOTIFICATION_MINUTES_BEFORE_END` env vars. The labels now interpolate `${minutes}` from `IBookingConfig`, and the corresponding `bot.hears()` matchers pass the same template data
 
 ## [2.3.0] - 2026-08-27
 

@@ -3,6 +3,18 @@ import { UpdateNotificationPreferencesAction } from '../../../../src/bot/actions
 import { NotificationPreferencesUpdatedMessage } from '../../../../src/bot/messages/notification-preferences/notification-preferences-updated.message';
 import { createMockContext } from '../../../helpers/create-mock-context';
 import type { User } from '../../../../src/generated/prisma';
+import type { IBookingConfig } from '../../../../src/config/booking.config';
+
+const fakeBookingConfig: IBookingConfig = {
+  availableFromTime: '07:00',
+  availableToTime: '23:59',
+  slotSizeMinutes: 30,
+  minDurationMinutes: 30,
+  maxDurationMinutes: 180,
+  daysAhead: 7,
+  minutesBeforeStartNotification: 30,
+  minutesBeforeEndNotification: 15,
+};
 
 const fakeUser: User = {
   id: 5,
@@ -19,7 +31,7 @@ const fakeUser: User = {
 
 function makeAction() {
   const userService = { update: vi.fn().mockResolvedValue(fakeUser) };
-  const action = new UpdateNotificationPreferencesAction(userService as any);
+  const action = new UpdateNotificationPreferencesAction(userService as any, fakeBookingConfig);
   return { action, userService };
 }
 
@@ -46,6 +58,6 @@ describe('UpdateNotificationPreferencesAction', () => {
     const { action } = makeAction();
     const c = ctx();
     await action.run(c, 'notifyBeforeBookingStarts', true);
-    expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser);
+    expect(NotificationPreferencesUpdatedMessage.reply).toHaveBeenCalledWith(c, fakeUser, fakeBookingConfig);
   });
 });

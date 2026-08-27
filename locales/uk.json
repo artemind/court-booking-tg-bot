@@ -8,10 +8,10 @@
       "notification_preferences": "🔔 Налаштування сповіщень"
     },
     "notification_preferences": {
-      "notify_before_booking_starts_enabled": "🔔 За 30хв до початку бронювання",
-      "notify_before_booking_starts_disabled": "🔕 За 30хв до початку бронювання",
-      "notify_before_booking_ends_enabled": "🔔 За 15хв до закінчення бронювання",
-      "notify_before_booking_ends_disabled": "🔕 За 15хв до закінчення бронювання"
+      "notify_before_booking_starts_enabled": "🔔 За ${minutes}хв до початку бронювання",
+      "notify_before_booking_starts_disabled": "🔕 За ${minutes}хв до початку бронювання",
+      "notify_before_booking_ends_enabled": "🔔 За ${minutes}хв до закінчення бронювання",
+      "notify_before_booking_ends_disabled": "🔕 За ${minutes}хв до закінчення бронювання"
     }
   },
   "exceptions": {

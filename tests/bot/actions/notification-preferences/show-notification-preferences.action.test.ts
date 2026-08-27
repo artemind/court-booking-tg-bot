@@ -3,6 +3,18 @@ import { ShowNotificationPreferencesAction } from '../../../../src/bot/actions/n
 import { NotificationPreferencesKeyboard } from '../../../../src/bot/keyboards/notification-preferences.keyboard';
 import { createMockContext } from '../../../helpers/create-mock-context';
 import type { User } from '../../../../src/generated/prisma';
+import type { IBookingConfig } from '../../../../src/config/booking.config';
+
+const fakeBookingConfig: IBookingConfig = {
+  availableFromTime: '07:00',
+  availableToTime: '23:59',
+  slotSizeMinutes: 30,
+  minDurationMinutes: 30,
+  maxDurationMinutes: 180,
+  daysAhead: 7,
+  minutesBeforeStartNotification: 30,
+  minutesBeforeEndNotification: 15,
+};
 
 const fakeUser: User = {
   id: 1,
@@ -26,7 +38,7 @@ describe('ShowNotificationPreferencesAction', () => {
   });
 
   it("calls ctx.reply with the 'notification_preferences' i18n key", async () => {
-    const action = new ShowNotificationPreferencesAction();
+    const action = new ShowNotificationPreferencesAction(fakeBookingConfig);
     const ctx = createMockContext({ user: fakeUser });
 
     await action.run(ctx);
@@ -37,7 +49,7 @@ describe('ShowNotificationPreferencesAction', () => {
   });
 
   it('builds keyboard with user notification preferences', async () => {
-    const action = new ShowNotificationPreferencesAction();
+    const action = new ShowNotificationPreferencesAction(fakeBookingConfig);
     const ctx = createMockContext({ user: fakeUser });
 
     await action.run(ctx);
@@ -46,11 +58,13 @@ describe('ShowNotificationPreferencesAction', () => {
       ctx.i18n,
       fakeUser.notifyBeforeBookingStarts,
       fakeUser.notifyBeforeBookingEnds,
+      fakeBookingConfig.minutesBeforeStartNotification,
+      fakeBookingConfig.minutesBeforeEndNotification,
     );
   });
 
   it('passes the keyboard to ctx.reply', async () => {
-    const action = new ShowNotificationPreferencesAction();
+    const action = new ShowNotificationPreferencesAction(fakeBookingConfig);
     const ctx = createMockContext({ user: fakeUser });
 
     await action.run(ctx);

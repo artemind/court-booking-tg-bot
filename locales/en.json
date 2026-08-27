@@ -8,10 +8,10 @@
       "notification_preferences": "🔔 Notification Preferences"
     },
     "notification_preferences": {
-      "notify_before_booking_starts_enabled": "🔔 30 min before the start",
-      "notify_before_booking_starts_disabled": "🔕 30 min before the start",
-      "notify_before_booking_ends_enabled": "🔔 15 min to the end",
-      "notify_before_booking_ends_disabled": "🔕 15 min to the end"
+      "notify_before_booking_starts_enabled": "🔔 ${minutes} min before the start",
+      "notify_before_booking_starts_disabled": "🔕 ${minutes} min before the start",
+      "notify_before_booking_ends_enabled": "🔔 ${minutes} min to the end",
+      "notify_before_booking_ends_disabled": "🔕 ${minutes} min to the end"
     }
   },
   "exceptions": {
