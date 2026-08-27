@@ -65,7 +65,7 @@ export class Bot {
       console.error(err);
       try {
         if (err instanceof ReplyableException) {
-          await ctx.reply(`${ctx.i18n.t('exceptions.oops')}: ${err.message}`);
+          await ctx.reply(`${ctx.i18n.t('exceptions.oops')}: ${ctx.i18n.t(err.i18nKey)}`);
         } else {
           await ctx.reply(ctx.i18n.t('exceptions.oops'));
         }

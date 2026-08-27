@@ -28,12 +28,12 @@ export class ChooseDateAction {
     }
 
     const timestamp = parseIntSafe(timestampStr);
-    if (timestamp === null) throw new InvalidDateSelectedException(ctx.i18n);
+    if (timestamp === null) throw new InvalidDateSelectedException();
 
     const selectedDate = dayjs.utc(timestamp).startOf('day');
     const availableDates = this.bookingSlotService.generateDateSlots().map(date => date.format('DD-MM-YYYY'));
     if (!availableDates.includes(selectedDate.format('DD-MM-YYYY'))) {
-      throw new InvalidDateSelectedException(ctx.i18n);
+      throw new InvalidDateSelectedException();
     }
 
     ctx.session.bookingData.date = selectedDate;

@@ -35,9 +35,9 @@ describe('RestrictAccessMiddleware', () => {
     await expect(middleware(ctx, next)).rejects.toBeInstanceOf(UserNotFoundException);
   });
 
-  it('UserNotFoundException message is the i18n key', async () => {
+  it('UserNotFoundException carries the i18n key', async () => {
     const ctx = createMockContext();
-    await expect(middleware(ctx, next)).rejects.toThrow('exceptions.user_not_found');
+    await expect(middleware(ctx, next)).rejects.toMatchObject({ i18nKey: 'exceptions.user_not_found' });
   });
 
   it('throws AccessRestrictedException when user.isAccessRestricted is true', async () => {
@@ -45,9 +45,9 @@ describe('RestrictAccessMiddleware', () => {
     await expect(middleware(ctx, next)).rejects.toBeInstanceOf(AccessRestrictedException);
   });
 
-  it('AccessRestrictedException message is the i18n key', async () => {
+  it('AccessRestrictedException carries the i18n key', async () => {
     const ctx = createMockContext({ user: mockUser({ isAccessRestricted: true }) });
-    await expect(middleware(ctx, next)).rejects.toThrow('exceptions.access_restricted');
+    await expect(middleware(ctx, next)).rejects.toMatchObject({ i18nKey: 'exceptions.access_restricted' });
   });
 
   it('calls next() for a normal unrestricted user', async () => {

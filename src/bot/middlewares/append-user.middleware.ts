@@ -17,7 +17,7 @@ export class AppendUserMiddleware {
       const languageCode = ctx.from?.language_code || null;
       const telegramId = ctx.from?.id;
       if (!telegramId) {
-        throw new UserNotFoundException(ctx.i18n);
+        throw new UserNotFoundException();
       }
 
       ctx.user = await this.userService.upsert({ name, telegramId, telegramUsername, languageCode });

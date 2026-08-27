@@ -25,10 +25,10 @@ export class ChooseCourtHandler implements IHandler {
   async register(): Promise<void> {
     this.bot.action(/^BOOKING_CHOOSE_COURT_(\d+)$/, async (ctx: Context): Promise<true | Message.TextMessage> => {
       const courtId = parseIntSafe(ctx.match[1]);
-      if (courtId === null) throw new CourtNotFoundException(ctx.i18n);
+      if (courtId === null) throw new CourtNotFoundException();
       const selectedCourt = await this.courtService.findById(courtId);
       if (!selectedCourt) {
-        throw new CourtNotFoundException(ctx.i18n);
+        throw new CourtNotFoundException();
       }
       ctx.session.bookingData = {
         courtId: selectedCourt.id,

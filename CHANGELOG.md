@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- `SlotConflictException` (and every other `ReplyableException`) rendered with an empty message because `i18n` was only resolved at construction time, and `SlotConflictException` was the one exception created without it. `bot.catch` now resolves the message from a public `i18nKey` via `ctx.i18n`, so `errors.slot_already_booked` is actually shown
+
+### Changed
+- `ReplyableException` no longer takes an `I18nContext` in its constructor — it only carries a public readonly `i18nKey`, resolved centrally in `bot.ts`'s error handler
+
 ## [2.3.0] - 2026-08-27
 
 ### Added
