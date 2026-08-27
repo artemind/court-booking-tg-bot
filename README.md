@@ -78,17 +78,20 @@ The bot follows a modular architecture with clear separation of concerns:
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `BOT_TOKEN` | Telegram bot token | Required |
-| `DATABASE_URL` | PostgreSQL connection string | Required |
-| `APP_LOCALE` | Application locale | `en` |
-| `APP_TIMEZONE` | Application timezone | `UTC` |
-| `BOOKING_AVAILABLE_FROM_TIME` | Booking start time | `07:00` |
-| `BOOKING_AVAILABLE_TO_TIME` | Booking end time | `23:59` |
-| `BOOKING_SLOT_SIZE_IN_MINUTES` | Time slot size | `30` |
-| `BOOKING_MIN_DURATION_MINUTES` | Minimum booking duration | `30` |
-| `BOOKING_MAX_DURATION_MINUTES` | Maximum booking duration | `180` |
+| Variable                            | Description                                     | Default  |
+|-------------------------------------|-------------------------------------------------|----------|
+| `BOT_TOKEN`                         | Telegram bot token                              | Required |
+| `DATABASE_URL`                      | PostgreSQL connection string                    | Required |
+| `APP_LOCALE`                        | Application locale                              | `en`     |
+| `APP_TIMEZONE`                      | Application timezone                            | `UTC`    |
+| `BOOKING_AVAILABLE_FROM_TIME`       | Booking start time                              | `07:00`  |
+| `BOOKING_AVAILABLE_TO_TIME`         | Booking end time                                | `23:59`  |
+| `BOOKING_SLOT_SIZE_IN_MINUTES`      | Time slot size                                  | `30`     |
+| `BOOKING_MIN_DURATION_MINUTES`      | Minimum booking duration                        | `30`     |
+| `BOOKING_MAX_DURATION_MINUTES`      | Maximum booking duration                        | `180`    |
+| `BOOKING_DAYS_AHEAD`                | How many days ahead can be booked               | `7`      |
+| `NOTIFICATION_MINUTES_BEFORE_START` | Minutes before booking start to send a reminder | `30`     |
+| `NOTIFICATION_MINUTES_BEFORE_END`   | Minutes before booking end to send a reminder   | `15`     |
 
 ## 🛠️ Development
 

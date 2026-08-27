@@ -15,6 +15,7 @@ const defaultConfig: IBookingConfig = {
   slotSizeMinutes: 30,
   minDurationMinutes: 30,
   maxDurationMinutes: 180,
+  daysAhead: 7,
   minutesBeforeStartNotification: 30,
   minutesBeforeEndNotification: 15,
 };

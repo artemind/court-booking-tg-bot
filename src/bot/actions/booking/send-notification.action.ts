@@ -7,6 +7,7 @@ import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
 import { I18n } from '@edjopato/telegraf-i18n';
 import type { NotifiableBooking, NotificationKind } from '../../services/booking.service';
+import { TOKENS } from '../../../config/tokens';
 
 const NOTIFICATION_PRESENTATION: Record<NotificationKind, { emoji: string, i18nKey: string }> = {
   start: { emoji: '⏳', i18nKey: 'notifications.before_booking_starts' },
@@ -19,7 +20,7 @@ export class SendNotificationAction {
   constructor(
     @inject(I18n)
     private i18n: I18n,
-    @inject('APP_LOCALE')
+    @inject(TOKENS.AppLocale)
     private defaultLanguageCode: string,
   ) {
   }

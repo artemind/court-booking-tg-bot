@@ -20,6 +20,7 @@ import { I18n } from '@edjopato/telegraf-i18n';
 import { injectable, Container } from 'inversify';
 import { IHandlerConstructor } from './handlers/handler.interface';
 import { provide } from '@inversifyjs/binding-decorators';
+import { TOKENS } from '../config/tokens';
 
 @injectable()
 @provide()
@@ -44,7 +45,7 @@ export class Bot {
 
   constructor(private container: Container) {
     this.bot = this.container.get<Telegraf<Context>>(Telegraf);
-    this.locale = this.container.get<string>('APP_LOCALE');
+    this.locale = this.container.get<string>(TOKENS.AppLocale);
   }
 
   async launch(): Promise<void> {

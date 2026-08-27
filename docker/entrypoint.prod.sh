@@ -2,7 +2,7 @@
 set -e
 
 # Build DATABASE_URL from parts if not provided
-: "${DATABASE_HOST:=db}"
+: "${DATABASE_HOST:=postgres}"
 : "${DATABASE_PORT:=5432}"
 : "${DATABASE_NAME:=courtbot}"
 : "${DATABASE_USER:=postgres}"

@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed
-- `SlotConflictException` (and every other `ReplyableException`) rendered with an empty message because `i18n` was only resolved at construction time, and `SlotConflictException` was the one exception created without it. `bot.catch` now resolves the message from a public `i18nKey` via `ctx.i18n`, so `errors.slot_already_booked` is actually shown
+### Added
+- `src/config/app.config.ts` — zod schema validating every environment variable (`BOT_TOKEN`, `APP_LOCALE`, `APP_TIMEZONE`, all `BOOKING_*`/`NOTIFICATION_*`, plus the new `BOOKING_DAYS_AHEAD`); `loadAppConfig()` throws a readable error on startup instead of silently producing `NaN`
+- `BOOKING_DAYS_AHEAD` environment variable, replacing the hardcoded `days = 7` default in `BookingSlotService.generateDateSlots()`
+- `src/config/tokens.ts` — a single `TOKENS` object for DI tokens
 
 ### Changed
+- `'APP_LOCALE'` string literal and `BOOKING_CONFIG_TOKEN` constant replaced by `TOKENS.AppLocale` / `TOKENS.BookingConfig` across `app.ts`, `bot.ts`, `notification-scheduler.ts`, `booking-slot.service.ts`, `send-notification.action.ts`
+- `formatDate()` no longer reads `process.env.APP_LOCALE` itself — `locale` is now a required parameter
 - `ReplyableException` no longer takes an `I18nContext` in its constructor — it only carries a public readonly `i18nKey`, resolved centrally in `bot.ts`'s error handler
+
+### Fixed
+- `SlotConflictException` (and every other `ReplyableException`) rendered with an empty message because `i18n` was only resolved at construction time, and `SlotConflictException` was the one exception created without it. `bot.catch` now resolves the message from a public `i18nKey` via `ctx.i18n`, so `errors.slot_already_booked` is actually shown
 
 ## [2.3.0] - 2026-08-27
 

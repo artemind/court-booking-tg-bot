@@ -9,34 +9,34 @@ import { Bot } from './bot/bot';
 import { buildProviderModule } from '@inversifyjs/binding-decorators';
 import { Telegraf } from 'telegraf';
 import { I18n } from '@edjopato/telegraf-i18n';
-import { BOOKING_CONFIG_TOKEN, IBookingConfig } from './config/booking.config';
+import { IBookingConfig } from './config/booking.config';
+import { TOKENS } from './config/tokens';
+import { AppConfig, loadAppConfig } from './config/app.config';
 
-function configureDayjs(): void {
-  dayjs.locale(process.env.APP_LOCALE || 'en');
+function configureDayjs(appConfig: AppConfig): void {
+  dayjs.locale(appConfig.APP_LOCALE);
   dayjs.extend(utc);
   dayjs.extend(timezone);
-  dayjs.tz.setDefault(process.env.APP_TIMEZONE || 'UTC');
+  dayjs.tz.setDefault(appConfig.APP_TIMEZONE);
 }
 
-async function buildContainer(): Promise<Container> {
-  const token = process.env.BOT_TOKEN;
-  if (!token) throw new Error('BOT_TOKEN is not defined');
-
+async function buildContainer(appConfig: AppConfig): Promise<Container> {
   const container = new Container();
   container.bind<PrismaClient>(PrismaClient).toConstantValue(new PrismaClient());
-  container.bind<string>('APP_LOCALE').toConstantValue(process.env.APP_LOCALE || 'en');
-  container.bind<IBookingConfig>(BOOKING_CONFIG_TOKEN).toConstantValue({
-    availableFromTime:              process.env.BOOKING_AVAILABLE_FROM_TIME  || '07:00',
-    availableToTime:                process.env.BOOKING_AVAILABLE_TO_TIME    || '23:59',
-    slotSizeMinutes:                parseInt(process.env.BOOKING_SLOT_SIZE_IN_MINUTES || '30'),
-    minDurationMinutes:             parseInt(process.env.BOOKING_MIN_DURATION_MINUTES || '30'),
-    maxDurationMinutes:             parseInt(process.env.BOOKING_MAX_DURATION_MINUTES || '180'),
-    minutesBeforeStartNotification: parseInt(process.env.NOTIFICATION_MINUTES_BEFORE_START || '30'),
-    minutesBeforeEndNotification:   parseInt(process.env.NOTIFICATION_MINUTES_BEFORE_END   || '15'),
+  container.bind<string>(TOKENS.AppLocale).toConstantValue(appConfig.APP_LOCALE);
+  container.bind<IBookingConfig>(TOKENS.BookingConfig).toConstantValue({
+    availableFromTime:              appConfig.BOOKING_AVAILABLE_FROM_TIME,
+    availableToTime:                appConfig.BOOKING_AVAILABLE_TO_TIME,
+    slotSizeMinutes:                appConfig.BOOKING_SLOT_SIZE_IN_MINUTES,
+    minDurationMinutes:             appConfig.BOOKING_MIN_DURATION_MINUTES,
+    maxDurationMinutes:             appConfig.BOOKING_MAX_DURATION_MINUTES,
+    daysAhead:                      appConfig.BOOKING_DAYS_AHEAD,
+    minutesBeforeStartNotification: appConfig.NOTIFICATION_MINUTES_BEFORE_START,
+    minutesBeforeEndNotification:   appConfig.NOTIFICATION_MINUTES_BEFORE_END,
   });
-  container.bind<Telegraf>(Telegraf).toConstantValue(new Telegraf(token));
+  container.bind<Telegraf>(Telegraf).toConstantValue(new Telegraf(appConfig.BOT_TOKEN));
   container.bind<I18n>(I18n).toConstantValue(new I18n({
-    defaultLanguage: process.env.APP_LOCALE || 'en',
+    defaultLanguage: appConfig.APP_LOCALE,
     allowMissing: true,
     directory: path.join(__dirname, '..', 'locales'),
   }));
@@ -46,8 +46,9 @@ async function buildContainer(): Promise<Container> {
 
 async function bootstrap(): Promise<void> {
   config();
-  configureDayjs();
-  const container = await buildContainer();
+  const appConfig = loadAppConfig();
+  configureDayjs(appConfig);
+  const container = await buildContainer(appConfig);
   const bot = new Bot(container);
   const prisma = container.get(PrismaClient);
 

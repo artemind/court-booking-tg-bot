@@ -7,8 +7,8 @@ import { Context } from './context';
 import { BookingService } from './services/booking.service';
 import type { PendingNotification } from './services/booking.service';
 import { SendNotificationAction } from './actions/booking/send-notification.action';
-import { BOOKING_CONFIG_TOKEN } from '../config/booking.config';
 import type { IBookingConfig } from '../config/booking.config';
+import { TOKENS } from '../config/tokens';
 
 /**
  * Runs every minute. The lead times are configurable and need not align with any coarser
@@ -28,7 +28,7 @@ export class NotificationScheduler {
     private bookingService: BookingService,
     @inject(SendNotificationAction)
     private sendNotificationAction: SendNotificationAction,
-    @inject(BOOKING_CONFIG_TOKEN)
+    @inject(TOKENS.BookingConfig)
     private config: IBookingConfig,
   ) {}
 

@@ -2,19 +2,19 @@ import dayjs from 'dayjs';
 import { Booking } from '../../generated/prisma';
 import { inject, injectable } from 'inversify';
 import { provide } from '@inversifyjs/binding-decorators';
-import { BOOKING_CONFIG_TOKEN } from '../../config/booking.config';
 import type { IBookingConfig } from '../../config/booking.config';
+import { TOKENS } from '../../config/tokens';
 
 @injectable()
 @provide()
 export class BookingSlotService {
   constructor(
-    @inject(BOOKING_CONFIG_TOKEN)
+    @inject(TOKENS.BookingConfig)
     private config: IBookingConfig,
   ) {
   }
 
-  generateDateSlots(days: number = 7): dayjs.Dayjs[] {
+  generateDateSlots(days: number = this.config.daysAhead): dayjs.Dayjs[] {
     const slots: dayjs.Dayjs[] = [];
     let currentDate = dayjs().startOf('day');
     const endDate = currentDate.clone().add(days, 'day');
